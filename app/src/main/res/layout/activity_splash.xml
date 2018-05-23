@@ -4,7 +4,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="org.upesacm.acmacmw.Hierarchy_and_contacts">
+    tools:context="org.upesacm.acmacmw.SplashActivity">
 
     <TextView
         android:layout_width="wrap_content"
