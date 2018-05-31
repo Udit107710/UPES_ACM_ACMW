@@ -10,6 +10,9 @@ public class ACMHeirarchyActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_acmheirarchy);
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> remotes/Janhvi/master
     }
 }
