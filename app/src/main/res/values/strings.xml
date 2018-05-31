@@ -8,6 +8,19 @@
         <item>Event 4 </item>
         <item>Event 5 </item>
         <item>Event 6 </item>
-
     </string-array>
+
+    <string name="title_activity_instagram_newsfeed">InstagramNewsfeed</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+    <string name="title_star">Star</string>
+    <string name="title_available">Available Members</string>
+    <string name="title_contact">Contact Us</string>
+    <string name="title_myevents">My Events</string>
+    <string name="title_upcmngevents">Upcoming Events</string>
+    <string name="title_projects">Ongoing Projects</string>
+    <string name="title_study">Study Material</string>
+    <string name="title_alumni">Alumni</string>
+    <string name="title_About">About ACM</string>
 </resources>
