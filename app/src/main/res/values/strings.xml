@@ -13,4 +13,9 @@
     <string name="title_study">Study Material</string>
     <string name="title_alumni">Alumni</string>
     <string name="title_About">About ACM</string>
+    <string name="drawer_opened">Drawer Opened</string>
+    <string name="drawer_closed">Drawer Closed</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>

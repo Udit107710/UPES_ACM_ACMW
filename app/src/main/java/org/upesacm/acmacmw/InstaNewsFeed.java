@@ -8,6 +8,6 @@ public class InstaNewsFeed extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_insta_news_feed);
+        setContentView(R.layout.activity_home_body);
     }
 }

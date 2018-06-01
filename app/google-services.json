@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "1010831108005",
+    "firebase_url": "https://acm-acmw-app-6aa17.firebaseio.com",
+    "project_id": "acm-acmw-app-6aa17",
+    "storage_bucket": "acm-acmw-app-6aa17.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1010831108005:android:18c5b1700d34a0c1",
+        "android_client_info": {
+          "package_name": "org.upesacm.acmacmw"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1010831108005-td8h8g7vlfvhr4fa78qkiuccs8sg92du.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "1010831108005-td8h8g7vlfvhr4fa78qkiuccs8sg92du.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBStvQogm88_qHmrY7ebloEcSrQgPddcmg"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
