@@ -1,5 +1,15 @@
 <resources>
     <string name="app_name">UPES ACM &amp; ACM-W</string>
+    <string name="Events">Select Your Event</string>
+    <string-array name="Events">
+        <item>Event 1 </item>
+        <item>Event 2 </item>
+        <item>Event 3 </item>
+        <item>Event 4 </item>
+        <item>Event 5 </item>
+        <item>Event 6 </item>
+    </string-array>
+
     <string name="title_activity_instagram_newsfeed">InstagramNewsfeed</string>
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
@@ -13,4 +23,9 @@
     <string name="title_study">Study Material</string>
     <string name="title_alumni">Alumni</string>
     <string name="title_About">About ACM</string>
+    <string name="drawer_opened">Drawer Opened</string>
+    <string name="drawer_closed">Drawer Closed</string>
+
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
