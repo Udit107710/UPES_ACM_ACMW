@@ -47,18 +47,18 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
-        private TextView textView;
+        private TextView username;
         private ImageView imageView;
         public ViewHolder(View itemView) {
             super(itemView);
-            textView=itemView.findViewById(R.id.row_textView);
+            username=itemView.findViewById(R.id.username);
         }
 
         //This function has been defined to seperate the code of binding the data with the views
         //Othewise the data binding could be done inside the Adapter's onBindViewHolder function
         public void bindData(final Post post) {
             System.out.println("bindData called");
-            textView.setText(post.getImageUrl());
+            username.setText(post.getImageUrl());
         }
     }
 }
