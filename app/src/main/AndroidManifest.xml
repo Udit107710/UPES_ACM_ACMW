@@ -18,8 +18,7 @@
         </activity>
         <activity android:name=".EventRegistration" />
         <activity android:name=".MembersAtCampus" />
-        <activity android:name=".ACMHeirarchyActivity" />
-        <activity android:name=".OngoingProjectsFragments"></activity>
+        <activity android:name=".ACMHeirarchyActivity"></activity>
     </application>
 
 </manifest>
