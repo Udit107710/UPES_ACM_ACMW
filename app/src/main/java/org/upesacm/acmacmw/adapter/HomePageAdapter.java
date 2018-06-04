@@ -9,16 +9,22 @@ import org.upesacm.acmacmw.fragment.PostsFragment;
 import org.upesacm.acmacmw.fragment.QuizFragment;
 import org.upesacm.acmacmw.model.Post;
 import org.upesacm.acmacmw.model.Question;
+import org.upesacm.acmacmw.retrofit.PostClient;
 
 import java.util.ArrayList;
+
+import retrofit2.Retrofit;
 
 public class HomePageAdapter extends FragmentPagerAdapter {
     ArrayList<Post> posts;
     ArrayList<Question> questions;
-    public HomePageAdapter(FragmentManager fragmentManager,ArrayList<Post> posts, ArrayList<Question> questions) {
+    Retrofit retrofit;
+    public HomePageAdapter(FragmentManager fragmentManager, Retrofit retrofit,
+                            ArrayList<Post> posts, ArrayList<Question> questions) {
         super(fragmentManager);
         this.posts=posts;
         this.questions=questions;
+        this.retrofit=retrofit;
     }
     @Override
     public Fragment getItem(int position) {
@@ -26,6 +32,8 @@ public class HomePageAdapter extends FragmentPagerAdapter {
         Bundle args=new Bundle();
         if(position==0) {
             PostsFragment postsFragment=new PostsFragment();
+            PostClient postClient= retrofit.create(PostClient.class);
+            postsFragment.setPostClient(postClient);
             args.putParcelableArrayList("posts",posts);
             fragment=postsFragment;
         }
