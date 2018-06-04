@@ -19,8 +19,12 @@ import org.upesacm.acmacmw.model.Question;
 
 import java.util.ArrayList;
 
-public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
+public class HomeActivity extends AppCompatActivity implements
+        NavigationView.OnNavigationItemSelectedListener{
+    private static final String BASE_URL="https://acm-acmw-app-6aa17.firebaseio.com/";
     TabLayout tabLayout;
     ViewPager homePager;
     Toolbar toolbar;
@@ -28,6 +32,7 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     HomePageAdapter homePageAdapter;
     FragmentManager fragmentManager;
     NavigationView navigationView;
+    Retrofit retrofit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,8 +44,14 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout=(DrawerLayout)findViewById(R.id.drawer_layout);
         fragmentManager=getSupportFragmentManager();
         navigationView=findViewById(R.id.nav_view);
+        retrofit=new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
 
         tabLayout.setupWithViewPager(homePager);
+
+
         /* *************************Setting the the action bar *****************************/
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle=new ActionBarDrawerToggle(this,drawerLayout,toolbar,
@@ -52,22 +63,31 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
 
         /* *******************Creating demo posts and questions********************/
         ArrayList<Post> posts=new ArrayList<>();
-        for(int i=1;i<1000;i++) {
+        for(int i=1;i<10;i++) {
             posts.add(new Post("Post "+i));
         }
         ArrayList<Question> questions=new ArrayList<>();
-        for(int i=1;i<1000;i++) {
+        for(int i=1;i<10;i++) {
             questions.add(new Question("Question "+i));
         }
         /* ***********************************************************************/
 
 
+        /* *********************** Creating Retrofit Instance *********************************/
+        retrofit=new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+        /* ***********************************************************************************/
+
+
         /* *********************creating and setting the home page adapter******************/
-        homePageAdapter = new HomePageAdapter(fragmentManager,posts,questions);
+        homePageAdapter = new HomePageAdapter(fragmentManager,retrofit,posts,questions);
         homePager.setAdapter(homePageAdapter);
         /* ***********************************************************************************/
 
         navigationView.setNavigationItemSelectedListener(this);
+
     }
 
     @Override
