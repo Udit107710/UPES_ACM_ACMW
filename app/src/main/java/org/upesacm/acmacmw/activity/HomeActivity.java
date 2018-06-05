@@ -16,9 +16,17 @@ import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.adapter.HomePageAdapter;
 import org.upesacm.acmacmw.model.Post;
 import org.upesacm.acmacmw.model.Question;
+import org.upesacm.acmacmw.retrofit.HomePageClient;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 import retrofit2.Retrofit;
 import retrofit2.converter.jackson.JacksonConverterFactory;
 
@@ -33,7 +41,7 @@ public class HomeActivity extends AppCompatActivity implements
     FragmentManager fragmentManager;
     NavigationView navigationView;
     Retrofit retrofit;
-
+    HomePageClient homePageClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,9 +56,10 @@ public class HomeActivity extends AppCompatActivity implements
                 .baseUrl(BASE_URL)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
+        homePageClient =retrofit.create(HomePageClient.class);
+
 
         tabLayout.setupWithViewPager(homePager);
-
 
         /* *************************Setting the the action bar *****************************/
         setSupportActionBar(toolbar);
@@ -62,6 +71,7 @@ public class HomeActivity extends AppCompatActivity implements
 
 
         /* *******************Creating demo posts and questions********************/
+        downloadHomePageData();
         ArrayList<Post> posts=new ArrayList<>();
         for(int i=1;i<10;i++) {
             posts.add(new Post("Post "+i));
@@ -82,7 +92,12 @@ public class HomeActivity extends AppCompatActivity implements
 
 
         /* *********************creating and setting the home page adapter******************/
-        homePageAdapter = new HomePageAdapter(fragmentManager,retrofit,posts,questions);
+        homePageAdapter = new HomePageAdapter.Builder()
+                .setFragmentManager(fragmentManager)
+                .setPosts(posts)
+                .setQuestions(questions)
+                .setHomePageClient(homePageClient)
+                .build();
         homePager.setAdapter(homePageAdapter);
         /* ***********************************************************************************/
 
@@ -95,5 +110,25 @@ public class HomeActivity extends AppCompatActivity implements
 
         System.out.println("onNaviagationItemSelected");
         return true;
+    }
+
+    public void downloadHomePageData() {
+        String currentDate=new SimpleDateFormat("dd-MM-yyyy")
+                               .format(Calendar.getInstance().getTime());
+        System.out.println("downloadHomePage - current date : "+currentDate);
+
+        Call<HashMap<String,Post>> call=homePageClient.getPosts(currentDate);
+        call.enqueue(new Callback<HashMap<String, Post>>() {
+            @Override
+            public void onResponse(Call<HashMap<String, Post>> call, Response<HashMap<String, Post>> response) {
+
+            }
+
+            @Override
+            public void onFailure(Call<HashMap<String, Post>> call, Throwable t) {
+
+            }
+        });
+
     }
 }

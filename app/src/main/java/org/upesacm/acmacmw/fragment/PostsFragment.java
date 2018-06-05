@@ -1,7 +1,6 @@
 package org.upesacm.acmacmw.fragment;
 
 import android.os.Bundle;
-import android.os.Handler;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
 import android.support.v7.widget.LinearLayoutManager;
@@ -14,19 +13,17 @@ import org.upesacm.acmacmw.adapter.PostsRecyclerViewAdapter;
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.listener.OnLoadMoreListener;
 import org.upesacm.acmacmw.model.Post;
-import org.upesacm.acmacmw.retrofit.PostClient;
+import org.upesacm.acmacmw.retrofit.HomePageClient;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.List;
 
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.Retrofit;
 
 public class PostsFragment extends Fragment implements  OnLoadMoreListener,
         Callback<HashMap<String,Post>> {
@@ -34,7 +31,7 @@ public class PostsFragment extends Fragment implements  OnLoadMoreListener,
     RecyclerView recyclerView;
     PostsRecyclerViewAdapter recyclerViewAdapter;
     private ArrayList<Post> posts;
-    PostClient postClient;
+    HomePageClient homePageClient;
     private Date currentDate;
     private int dayCount=-1;
     private SimpleDateFormat dateFormat;
@@ -66,8 +63,8 @@ public class PostsFragment extends Fragment implements  OnLoadMoreListener,
         return view;
     }
 
-    public Fragment setPostClient(PostClient postClient) {
-        this.postClient=postClient;
+    public Fragment setPostClient(HomePageClient homePageClient) {
+        this.homePageClient = homePageClient;
         return this;
     }
 
@@ -118,7 +115,7 @@ public class PostsFragment extends Fragment implements  OnLoadMoreListener,
 
 
         /* ************************do the download operation here********************** */
-        Call<HashMap<String,Post>> call=postClient.getPosts(dateId);
+        Call<HashMap<String,Post>> call= homePageClient.getPosts(dateId);
         call.enqueue(PostsFragment.this);
         /* **************************************************************************** */
     }
