@@ -101,8 +101,8 @@ public class PostsFragment extends Fragment implements  OnLoadMoreListener,
     @Override
     public void onLoadMore() {
         System.out.println("on load more");
+        recyclerViewAdapter.setLoading(true);//keep this above the addPost
         recyclerViewAdapter.addPost(null);//place holder for the progress bar
-        recyclerViewAdapter.setLoading(true);
 
         /* *********Getting the date for the new set of posts ********************* */
         Calendar c = Calendar.getInstance();

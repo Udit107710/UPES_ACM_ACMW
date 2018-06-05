@@ -5,6 +5,7 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -23,12 +24,15 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     private OnLoadMoreListener onLoadMoreListener;
     private RecyclerView recyclerView;
     boolean isLoading=false;
+    boolean initiallyEmptyDataset;
     ArrayList<Post> posts;
     private String date;
     public PostsRecyclerViewAdapter(RecyclerView recyclerView,ArrayList<Post> posts) {
         this.posts=posts;
         this.recyclerView=recyclerView;
         addOnScrollListener();
+        if(posts.size()==0)
+            initiallyEmptyDataset=true;
     }
     @Override
 
@@ -39,15 +43,11 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
         //     Eg ; match_constraint is equivalent to 0dp in constaint layout
         //      But if root is not specified then, the inflator will inflate the child with 0dp such that its dimension(whichever
         //      we have set as match_constraint) is 0dp.
-        View viewitem ;
-        if(viewType==R.layout.post_layout) {
-            viewitem = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
+        View viewitem = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
+        if(viewType==R.layout.post_layout)
             return new PostViewHolder(viewitem);
-        }
-        else  {
-            viewitem = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
+        else
             return new LoadingViewHolder(viewitem);
-        }
     }
 
     @Override
@@ -55,8 +55,6 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
         System.out.println("onBinViewHolder Called");
         if(holder instanceof PostViewHolder)
             ((PostViewHolder) holder).bindData(posts.get(position));
-        else if(holder instanceof LoadingViewHolder)
-            ((LoadingViewHolder) holder).bindData();
     }
 
     @Override
@@ -69,10 +67,9 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
 
     @Override
     public int getItemViewType(final int position) {
-        if(posts.get(position)==null)
-            return R.layout.loading_post_layout;
+        if(posts.get(position)==null && isLoading)
+                return R.layout.loading_post_layout;
         return R.layout.post_layout;
-
     }
 
     public class PostViewHolder extends RecyclerView.ViewHolder {
@@ -92,17 +89,10 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     }
 
     public class LoadingViewHolder extends RecyclerView.ViewHolder {
-        ProgressBar loadingProgressBar;
         LoadingViewHolder(View itemView) {
             super(itemView);
-            loadingProgressBar=itemView.findViewById(R.id.progressBar);
-        }
-        public void bindData() {
-            loadingProgressBar.setIndeterminate(true);
         }
     }
-
-
 
     public void removePost() {
         int pos=posts.size()-1;

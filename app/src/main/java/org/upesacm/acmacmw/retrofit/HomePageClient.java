@@ -14,4 +14,6 @@ import retrofit2.http.Path;
 public interface HomePageClient {
     @GET("posts/{date}.json")
     Call<HashMap<String,Post>> getPosts(@Path("date") String date);
+
+
 }
