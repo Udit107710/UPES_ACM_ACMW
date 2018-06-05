@@ -24,15 +24,12 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     private OnLoadMoreListener onLoadMoreListener;
     private RecyclerView recyclerView;
     boolean isLoading=false;
-    boolean initiallyEmptyDataset;
     ArrayList<Post> posts;
     private String date;
     public PostsRecyclerViewAdapter(RecyclerView recyclerView,ArrayList<Post> posts) {
         this.posts=posts;
         this.recyclerView=recyclerView;
         addOnScrollListener();
-        if(posts.size()==0)
-            initiallyEmptyDataset=true;
     }
     @Override
 

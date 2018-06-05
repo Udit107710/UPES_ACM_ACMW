@@ -18,6 +18,8 @@ import java.util.Date;
 import java.util.HashMap;
 
 import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class HomePageDataDownloader extends AsyncTask<Object,Void,Boolean> {
     HomePageClient homePageClient;
@@ -36,36 +38,30 @@ public class HomePageDataDownloader extends AsyncTask<Object,Void,Boolean> {
         SimpleDateFormat sdf=new SimpleDateFormat("dd-MM-yyyy");
         Date date=calendar.getTime();
         String stringDate=sdf.format(date);
+
+        calendar.add(Calendar.MONTH,-1);
+        String defaultDate=sdf.format(calendar.getTime());
         System.out.println("downloadHomePage - current date : "+stringDate);
 
         try {
-            HashMap<String,Post> map=null;
-            int daycount=-1;
-            while(map==null && !date.equals("01-06-2018")) {
-                System.out.println("downloadHomePage -  date : "+stringDate);
+            HashMap<String,Post> hashMap=null;
+            Call<HashMap<String,HashMap<String,Post>>> call=homePageClient.getAllPosts();
+            HashMap<String,HashMap<String,Post>> stringHashMapHashMap=call.execute().body();
 
-                Call<HashMap<String, Post>> postsCall = homePageClient.getPosts(stringDate);
-                //Call<HashMap<String,Post>> questionsCall=homePageClient.getQuestions();
-                map = postsCall.execute().body();
-                if (map != null) {
-                    for (String key : map.keySet()) {
-                        posts.add(map.get(key));
+            while(!stringDate.equals(defaultDate)) {
+                System.out.println("downloadHomePage -  date : "+stringDate);
+                hashMap=stringHashMapHashMap.get(stringDate);
+                if (hashMap != null) {
+                    for (String key : hashMap.keySet()) {
+                        posts.add(hashMap.get(key));
                     }
                 }
+                System.out.println("posts : "+posts.size());
                 calendar.setTime(date);// date
-                calendar.add(Calendar.DATE,daycount);//date - 1 day
+                calendar.add(Calendar.DATE,-1);//date - 1 day
                 date=calendar.getTime();//converting back to date object
                 stringDate=sdf.format(date);//converting to string
-
-                daycount--;
             }
-
-           /* HashMap<String,Question> questionHashMap=questionsCall.execute().body();
-            if(questionHashMap!=null) {
-                for(String key:questionHashMap.keySet()) {
-                    questions.add(questionHashMap.get(key));
-                }
-            } */
 
         }catch(IOException ioe) {
             ioe.printStackTrace();

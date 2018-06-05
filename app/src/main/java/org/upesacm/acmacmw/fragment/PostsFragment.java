@@ -32,13 +32,15 @@ public class PostsFragment extends Fragment implements  OnLoadMoreListener,
     PostsRecyclerViewAdapter recyclerViewAdapter;
     private ArrayList<Post> posts;
     HomePageClient homePageClient;
-    private Date currentDate;
-    private int dayCount=-1;
+    private Date defaultDate;
+    private int dayCount=0;
     private SimpleDateFormat dateFormat;
     public PostsFragment() {
         // Required empty public constructor
         dateFormat=new SimpleDateFormat("dd-MM-yyyy");
-        currentDate=Calendar.getInstance().getTime();
+        Calendar calendar=Calendar.getInstance();
+        calendar.add(Calendar.MONTH,-1);
+        defaultDate=calendar.getTime();
     }
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -106,7 +108,7 @@ public class PostsFragment extends Fragment implements  OnLoadMoreListener,
 
         /* *********Getting the date for the new set of posts ********************* */
         Calendar c = Calendar.getInstance();
-        c.setTime(currentDate);
+        c.setTime(defaultDate);
         c.add(Calendar.DATE,dayCount);
         String dateId=dateFormat.format(c.getTime());
         System.out.println("dateId : "+dateId);
