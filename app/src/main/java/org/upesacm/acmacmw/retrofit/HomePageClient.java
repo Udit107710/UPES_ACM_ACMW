@@ -19,5 +19,4 @@ public interface HomePageClient {
     @GET("Posts/{year}/{month}.json")
     Call<HashMap<String,Post>> getPosts(@Path("year") String year, @Path("month") String month);
 
-    /*@GET("posts.json")*/
 }
