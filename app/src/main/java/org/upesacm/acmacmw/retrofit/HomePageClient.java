@@ -12,9 +12,12 @@ import retrofit2.http.GET;
 import retrofit2.http.Path;
 
 public interface HomePageClient {
-    @GET("posts/{date}.json")
-    Call<HashMap<String,Post>> getPosts(@Path("date") String date);
 
-    @GET("posts.json")
-    Call<HashMap<String,HashMap<String,Post>>> getAllPosts();
+   @GET("Posts/{year}.json")
+    Call<HashMap<String,HashMap<String,Post>>> getPosts(@Path("year") String year);
+
+    @GET("Posts/{year}/{month}.json")
+    Call<HashMap<String,Post>> getPosts(@Path("year") String year, @Path("month") String month);
+
+    /*@GET("posts.json")*/
 }
