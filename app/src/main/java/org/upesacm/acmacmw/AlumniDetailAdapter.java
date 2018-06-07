@@ -34,9 +34,9 @@ public class AlumniDetailAdapter extends RecyclerView.Adapter<AlumniDetailAdapte
 
         AlumniDetail alumniDetail= detailList.get(position);
         holder.textViewName.setText(alumniDetail.getName());
-        holder.textViewDesignation.setText(alumniDetail.getDesignation());
+        holder.textViewDesignation.setText(alumniDetail.getPosition());
         holder.textViewSession.setText(alumniDetail.getSession());
-        holder.imageView.setImageDrawable(mCtx.getResources().getDrawable(alumniDetail.getImage()));
+        holder.imageView.setImageDrawable(mCtx.getResources().getDrawable(Integer.parseInt(alumniDetail.getImage())));
     }
 
     @Override
