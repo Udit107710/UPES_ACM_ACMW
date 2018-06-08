@@ -2,14 +2,14 @@ package org.upesacm.acmacmw;
 
 import java.util.UUID;
 
-public class Member {
+public class Members {
 
     private UUID mId;
     private String mName;
     private String mDescription;
 
 
-    public Member() {
+    public Members() {
         mId = UUID.randomUUID();
     }
 
