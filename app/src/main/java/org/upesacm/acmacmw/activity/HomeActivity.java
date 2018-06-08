@@ -1,5 +1,6 @@
 package org.upesacm.acmacmw.activity;
 
+import android.os.AsyncTask;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.design.widget.TabLayout;
@@ -14,13 +15,26 @@ import android.view.MenuItem;
 
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.adapter.HomePageAdapter;
+import org.upesacm.acmacmw.asynctask.HomePageDataDownloader;
 import org.upesacm.acmacmw.model.Post;
 import org.upesacm.acmacmw.model.Question;
+import org.upesacm.acmacmw.retrofit.HomePageClient;
 
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 
-public class HomeActivity extends AppCompatActivity implements NavigationView.OnNavigationItemSelectedListener{
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.converter.jackson.JacksonConverterFactory;
 
+public class HomeActivity extends AppCompatActivity implements
+        NavigationView.OnNavigationItemSelectedListener{
+    private static final String BASE_URL="https://acm-acmw-app-6aa17.firebaseio.com/";
     TabLayout tabLayout;
     ViewPager homePager;
     Toolbar toolbar;
@@ -28,7 +42,8 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
     HomePageAdapter homePageAdapter;
     FragmentManager fragmentManager;
     NavigationView navigationView;
-
+    Retrofit retrofit;
+    HomePageClient homePageClient;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,8 +54,15 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         drawerLayout=(DrawerLayout)findViewById(R.id.drawer_layout);
         fragmentManager=getSupportFragmentManager();
         navigationView=findViewById(R.id.nav_view);
+        retrofit=new Retrofit.Builder()
+                .baseUrl(BASE_URL)
+                .addConverterFactory(JacksonConverterFactory.create())
+                .build();
+        homePageClient =retrofit.create(HomePageClient.class);
+
 
         tabLayout.setupWithViewPager(homePager);
+
         /* *************************Setting the the action bar *****************************/
         setSupportActionBar(toolbar);
         ActionBarDrawerToggle toggle=new ActionBarDrawerToggle(this,drawerLayout,toolbar,
@@ -50,22 +72,10 @@ public class HomeActivity extends AppCompatActivity implements NavigationView.On
         /* **********************************************************************************/
 
 
-        /* *******************Creating demo posts and questions********************/
-        ArrayList<Post> posts=new ArrayList<>();
-        for(int i=1;i<1000;i++) {
-            posts.add(new Post("Post "+i));
-        }
-        ArrayList<Question> questions=new ArrayList<>();
-        for(int i=1;i<1000;i++) {
-            questions.add(new Question("Question "+i));
-        }
+        /* *******************Downloading data for homepage********************/
+        HomePageDataDownloader downloader=new HomePageDataDownloader();
+        downloader.execute(homePageClient,fragmentManager,homePager);
         /* ***********************************************************************/
-
-
-        /* *********************creating and setting the home page adapter******************/
-        homePageAdapter = new HomePageAdapter(fragmentManager,posts,questions);
-        homePager.setAdapter(homePageAdapter);
-        /* ***********************************************************************************/
 
         navigationView.setNavigationItemSelectedListener(this);
     }
