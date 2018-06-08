@@ -5,8 +5,8 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentPagerAdapter;
 
-import org.upesacm.acmacmw.fragment.PostsFragment;
-import org.upesacm.acmacmw.fragment.QuizFragment;
+import org.upesacm.acmacmw.fragment.homepage.viewpagerfragments.PostsFragment;
+import org.upesacm.acmacmw.fragment.homepage.viewpagerfragments.QuizFragment;
 import org.upesacm.acmacmw.model.Post;
 import org.upesacm.acmacmw.model.Question;
 import org.upesacm.acmacmw.retrofit.HomePageClient;

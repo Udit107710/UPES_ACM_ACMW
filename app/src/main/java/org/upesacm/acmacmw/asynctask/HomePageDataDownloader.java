@@ -3,6 +3,8 @@ package org.upesacm.acmacmw.asynctask;
 import android.os.AsyncTask;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.view.ViewPager;
+import android.view.View;
+import android.widget.ProgressBar;
 
 
 import org.upesacm.acmacmw.adapter.HomePageAdapter;
@@ -28,41 +30,28 @@ public class HomePageDataDownloader extends AsyncTask<Object,Void,Boolean> {
     HomePageAdapter homePageAdapter;
     FragmentManager fragmentManager;
     ViewPager homePager;
+    ProgressBar progressBar;
     @Override
     protected Boolean doInBackground(Object... objects) {
         homePageClient=(HomePageClient)objects[0];
         fragmentManager=(FragmentManager)objects[1];
         homePager=(ViewPager)objects[2];
-
-        Calendar calendar=Calendar.getInstance();
-        SimpleDateFormat sdf=new SimpleDateFormat("dd-MM-yyyy");
-        Date date=calendar.getTime();
-        String stringDate=sdf.format(date);
-
-        calendar.add(Calendar.MONTH,-1);
-        String defaultDate=sdf.format(calendar.getTime());
-        System.out.println("downloadHomePage - current date : "+stringDate);
-
+        progressBar=(ProgressBar)objects[3];
         try {
-            HashMap<String,Post> hashMap=null;
-            Call<HashMap<String,HashMap<String,Post>>> call=homePageClient.getAllPosts();
-            HashMap<String,HashMap<String,Post>> stringHashMapHashMap=call.execute().body();
+            Calendar calendar=Calendar.getInstance();
 
-            while(!stringDate.equals(defaultDate)) {
-                System.out.println("downloadHomePage -  date : "+stringDate);
-                hashMap=stringHashMapHashMap.get(stringDate);
-                if (hashMap != null) {
-                    for (String key : hashMap.keySet()) {
-                        posts.add(hashMap.get(key));
-                    }
+            HashMap<String,Post> hashMap=homePageClient.getPosts("Y"+calendar.get(Calendar.YEAR)
+                    ,"M"+calendar.get(Calendar.MONTH))
+                    .execute()
+                    .body();
+
+            System.out.println("hashmap : "+hashMap);
+            if(hashMap!=null) {
+                for(String key:hashMap.keySet()) {
+                    posts.add(hashMap.get(key));
                 }
-                System.out.println("posts : "+posts.size());
-                calendar.setTime(date);// date
-                calendar.add(Calendar.DATE,-1);//date - 1 day
-                date=calendar.getTime();//converting back to date object
-                stringDate=sdf.format(date);//converting to string
+                System.out.println(posts.size());
             }
-
         }catch(IOException ioe) {
             ioe.printStackTrace();
             return false;
@@ -80,5 +69,8 @@ public class HomePageDataDownloader extends AsyncTask<Object,Void,Boolean> {
                     .setHomePageClient(homePageClient)
                     .build();
         homePager.setAdapter(homePageAdapter);
+
+        homePager.setVisibility(View.VISIBLE);
+        progressBar.setVisibility(View.INVISIBLE);
     }
 }

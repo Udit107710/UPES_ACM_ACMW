@@ -1,4 +1,4 @@
-package org.upesacm.acmacmw.fragment;
+package org.upesacm.acmacmw.fragment.homepage.viewpagerfragments;
 
 import android.content.Context;
 import android.net.Uri;
