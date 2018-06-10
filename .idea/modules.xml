@@ -2,11 +2,7 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/UPES_ACM_ACMW.iml" filepath="$PROJECT_DIR$/.idea/UPES_ACM_ACMW.iml" />
-      <module fileurl="file://C:\Users\sinha\AndroidStudioProjects\UPES_ACM_ACMW\UPES_ACM_ACMW.iml" filepath="C:\Users\sinha\AndroidStudioProjects\UPES_ACM_ACMW\UPES_ACM_ACMW.iml" />
-      <module fileurl="file://C:\Users\sinha\AndroidStudioProjects\UPES_ACM_ACMW\.idea\UPES_ACM_ACMW.iml" filepath="C:\Users\sinha\AndroidStudioProjects\UPES_ACM_ACMW\.idea\UPES_ACM_ACMW.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
-      <module fileurl="file://C:\Users\sinha\AndroidStudioProjects\UPES_ACM_ACMW\app\app.iml" filepath="C:\Users\sinha\AndroidStudioProjects\UPES_ACM_ACMW\app\app.iml" />
     </modules>
   </component>
 </project>
