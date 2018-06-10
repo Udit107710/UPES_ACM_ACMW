@@ -17,6 +17,17 @@ public class Post implements Parcelable {
     };
     String imageUrl;
 
+    public String getCaption() {
+        return caption;
+    }
+
+    public void setCaption(String caption) {
+        this.caption = caption;
+    }
+
+    String caption;
+
+
     public Post() {}
 
     public Post(Parcel parcel) {
