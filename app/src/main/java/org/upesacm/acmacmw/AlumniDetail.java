@@ -7,15 +7,15 @@ public class AlumniDetail {
     private String Session;
     private String Image;
 
+    public AlumniDetail() {
+    }
 
     public AlumniDetail(String name, String position, String session, String image) {
         Name = name;
         Position = position;
         Session = session;
         Image = image;
-    }
 
-    public AlumniDetail() {
     }
 
     public String getName() {
@@ -49,4 +49,5 @@ public class AlumniDetail {
     public void setImage(String image) {
         Image = image;
     }
+
 }

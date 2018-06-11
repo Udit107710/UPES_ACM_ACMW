@@ -1,6 +1,8 @@
 package org.upesacm.acmacmw;
 
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -30,6 +32,8 @@ public class Alumni extends AppCompatActivity {
     AlumniDetailAdapter adapter;
     List<AlumniDetail> detailList;
     private DatabaseReference AlumniDatabase;
+    ImageView contact= (ImageView) findViewById(R.id.contact);
+    ImageView linkedin= (ImageView) findViewById(R.id.linkedin);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,12 +69,12 @@ public class Alumni extends AppCompatActivity {
                 firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<AlumniDetail, AlumniViewHolder>
                 (options) {
             @Override
-            protected void onBindViewHolder(@NonNull AlumniViewHolder holder, int position, @NonNull AlumniDetail model) {
+            protected void onBindViewHolder(@NonNull final AlumniViewHolder holder, int position, @NonNull AlumniDetail model) {
                 holder.setName(model.getName());
                 holder.setPosition(model.getPosition());
                 holder.setSession(model.getSession());
                 holder.setImage(getApplicationContext(), model.getImage());
-            }
+                }
 
             @NonNull
             @Override
@@ -84,6 +88,7 @@ public class Alumni extends AppCompatActivity {
 
         recyclerView.setAdapter(firebaseRecyclerAdapter);
         firebaseRecyclerAdapter.startListening();
+
     }
 }
 
