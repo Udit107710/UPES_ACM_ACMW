@@ -7,27 +7,21 @@ import android.view.View;
 import android.widget.ProgressBar;
 
 
-import org.upesacm.acmacmw.adapter.HomePageAdapter;
+import org.upesacm.acmacmw.adapter.HomeViewPagerAdapter;
 import org.upesacm.acmacmw.model.Post;
 import org.upesacm.acmacmw.model.Question;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.HashMap;
-
-import retrofit2.Call;
-import retrofit2.Callback;
-import retrofit2.Response;
 
 public class HomePageDataDownloader extends AsyncTask<Object,Void,Boolean> {
     HomePageClient homePageClient;
-    ArrayList<Post> posts=new ArrayList<>();
+    ArrayList<Post> posts;
     ArrayList<Question> questions=new ArrayList<>();
-    HomePageAdapter homePageAdapter;
+    HomeViewPagerAdapter homeViewPagerAdapter;
     FragmentManager fragmentManager;
     ViewPager homePager;
     ProgressBar progressBar;
@@ -38,6 +32,7 @@ public class HomePageDataDownloader extends AsyncTask<Object,Void,Boolean> {
         homePager=(ViewPager)objects[2];
         progressBar=(ProgressBar)objects[3];
         try {
+            posts=new ArrayList<>();
             Calendar calendar=Calendar.getInstance();
 
             HashMap<String,Post> hashMap=homePageClient.getPosts("Y"+calendar.get(Calendar.YEAR)
@@ -62,15 +57,19 @@ public class HomePageDataDownloader extends AsyncTask<Object,Void,Boolean> {
     @Override
     protected void onPostExecute(Boolean successful) {
         System.out.println("onPostexeceute");
-        homePageAdapter = new HomePageAdapter.Builder()
+        homeViewPagerAdapter = new HomeViewPagerAdapter.Builder()
                     .setFragmentManager(fragmentManager)
                     .setPosts(posts)
                     .setQuestions(questions)
                     .setHomePageClient(homePageClient)
                     .build();
-        homePager.setAdapter(homePageAdapter);
+        homePager.setAdapter(homeViewPagerAdapter);
 
         homePager.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.INVISIBLE);
+    }
+
+    public boolean isDataAvailable() {
+        return posts!=null;
     }
 }

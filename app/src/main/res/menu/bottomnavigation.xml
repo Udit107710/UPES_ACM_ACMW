@@ -5,9 +5,10 @@
         android:title="@string/title_home"
         android:icon="@drawable/home_bottomnav" />
 
-    <item android:id="@+id/action_star"
-        android:title="@string/title_star"
-        android:icon="@drawable/star_bottomnav" />
+    <item
+        android:id="@+id/action_upcoming_events"
+        android:icon="@drawable/star_bottomnav"
+        android:title="@string/title_upcmngevents" />
 
     <item android:id="@+id/action_avail"
         android:title="@string/title_available"

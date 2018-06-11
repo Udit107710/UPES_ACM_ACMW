@@ -22,6 +22,7 @@ public class HomeFragment extends Fragment {
     FragmentManager childFm;
     HomePageClient homePageClient;
     ProgressBar progressBar;
+    HomePageDataDownloader downloader;
     public HomeFragment() {
         // Required empty public constructor
     }
@@ -36,6 +37,7 @@ public class HomeFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         childFm=getChildFragmentManager();
+        System.out.println("onCreate home page fragment");
     }
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -50,8 +52,8 @@ public class HomeFragment extends Fragment {
 
         homePager.setVisibility(View.INVISIBLE);
         /* *******************Downloading data for homepage********************/
-        HomePageDataDownloader downloader=new HomePageDataDownloader();
-        downloader.execute(homePageClient,childFm,homePager,progressBar);
+        downloader = new HomePageDataDownloader();
+        downloader.execute(homePageClient, childFm, homePager, progressBar);
         /* ***********************************************************************/
         return view;
     }

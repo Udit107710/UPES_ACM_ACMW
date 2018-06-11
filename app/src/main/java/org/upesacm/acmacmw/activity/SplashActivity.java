@@ -1,9 +1,12 @@
-package org.upesacm.acmacmw;
+package org.upesacm.acmacmw.activity;
 
 import android.content.Intent;
 import  android.os.Handler;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+
+import org.upesacm.acmacmw.EventRegistration;
+import org.upesacm.acmacmw.R;
 
 public class SplashActivity extends AppCompatActivity {
       private static int SPLASH_TIME_OUT=2000;

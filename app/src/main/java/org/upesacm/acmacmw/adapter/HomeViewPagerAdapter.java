@@ -13,11 +13,11 @@ import org.upesacm.acmacmw.retrofit.HomePageClient;
 
 import java.util.ArrayList;
 
-public class HomePageAdapter extends FragmentPagerAdapter {
+public class HomeViewPagerAdapter extends FragmentPagerAdapter {
     private ArrayList<Post> posts;
     private ArrayList<Question> questions;
     private HomePageClient homePageClient;
-    private HomePageAdapter(FragmentManager fragmentManager) {
+    private HomeViewPagerAdapter(FragmentManager fragmentManager) {
         super(fragmentManager);
     }
     @Override
@@ -59,13 +59,13 @@ public class HomePageAdapter extends FragmentPagerAdapter {
         HomePageClient homePageClient;
         FragmentManager fragmentManager;
 
-        public HomePageAdapter build() {
-            HomePageAdapter homePageAdapter=new HomePageAdapter(fragmentManager);
-            homePageAdapter.homePageClient = homePageClient;
-            homePageAdapter.posts=posts;
-            homePageAdapter.questions=questions;
+        public HomeViewPagerAdapter build() {
+            HomeViewPagerAdapter homeViewPagerAdapter =new HomeViewPagerAdapter(fragmentManager);
+            homeViewPagerAdapter.homePageClient = homePageClient;
+            homeViewPagerAdapter.posts=posts;
+            homeViewPagerAdapter.questions=questions;
 
-            return homePageAdapter;
+            return homeViewPagerAdapter;
         }
 
         public Builder setPosts(ArrayList<Post> posts) {

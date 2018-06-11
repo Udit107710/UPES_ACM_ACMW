@@ -5,11 +5,8 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
 
 import org.upesacm.acmacmw.R;
@@ -17,7 +14,6 @@ import org.upesacm.acmacmw.listener.OnLoadMoreListener;
 import org.upesacm.acmacmw.model.Post;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
 
@@ -74,7 +70,7 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
         private ImageView imageView;
         public PostViewHolder(View itemView) {
             super(itemView);
-            username=itemView.findViewById(R.id.username);
+            username=itemView.findViewById(R.id.editText_username);
         }
 
         //This function has been defined to seperate the code of binding the data with the views
