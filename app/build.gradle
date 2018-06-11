@@ -40,5 +40,7 @@ dependencies {
     implementation files('libs/additional.jar')
     implementation files('libs/activation.jar')
     implementation files('libs/mail.jar')
+    implementation 'com.google.firebase:firebase-storage:11.8.0'
+    implementation 'com.google.firebase:firebase-database:11.8.0'
 }
 apply plugin: 'com.google.gms.google-services'
