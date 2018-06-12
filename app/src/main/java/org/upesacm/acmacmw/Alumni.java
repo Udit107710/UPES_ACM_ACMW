@@ -3,6 +3,8 @@ package org.upesacm.acmacmw;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
+import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -84,10 +86,24 @@ public class Alumni extends AppCompatActivity {
                     @Override
                     public void onClick(View v) {
                         System.out.println("Write on click");
-                        Intent callIntent = new Intent(Intent.ACTION_CALL);
+                        Intent callIntent = new Intent(Intent.ACTION_DIAL);
                         String temp="tel:"+model.getContact();
                         callIntent.setData(Uri.parse(temp));
                         getApplicationContext().startActivity(callIntent);
+                    }
+                });
+
+                holder.linkedinim.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        String temp= model.getLinkedin();
+                        Intent intent = new Intent(Intent.ACTION_VIEW, Uri.parse(temp));
+                        final PackageManager packageManager = getApplicationContext().getPackageManager();
+                        final List<ResolveInfo> list = packageManager.queryIntentActivities(intent, PackageManager.MATCH_DEFAULT_ONLY);
+                        if (list.isEmpty()) {
+                            intent = new Intent(Intent.ACTION_VIEW, Uri.parse("linkedin://you"));
+                        }
+                        startActivity(intent);
                     }
                 });
                 }
@@ -112,9 +128,11 @@ public class Alumni extends AppCompatActivity {
     class AlumniViewHolder extends RecyclerView.ViewHolder {
 
             ImageView contactim;
+            ImageView linkedinim;
             public AlumniViewHolder(View itemView) {
             super(itemView);
             contactim= itemView.findViewById(R.id.contactim);
+            linkedinim= itemView.findViewById(R.id.linkedinim);
         }
 
         public void setName(String Name) {
