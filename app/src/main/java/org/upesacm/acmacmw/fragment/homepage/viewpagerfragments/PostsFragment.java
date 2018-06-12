@@ -1,4 +1,4 @@
-package org.upesacm.acmacmw.fragment;
+package org.upesacm.acmacmw.fragment.homepage.viewpagerfragments;
 
 import android.os.Bundle;
 import android.support.annotation.Nullable;
@@ -32,15 +32,14 @@ public class PostsFragment extends Fragment implements  OnLoadMoreListener,
     PostsRecyclerViewAdapter recyclerViewAdapter;
     private ArrayList<Post> posts;
     HomePageClient homePageClient;
-    private Date defaultDate;
     private int dayCount=0;
+    private int monthCount=-1;
     private SimpleDateFormat dateFormat;
     public PostsFragment() {
         // Required empty public constructor
         dateFormat=new SimpleDateFormat("dd-MM-yyyy");
         Calendar calendar=Calendar.getInstance();
         calendar.add(Calendar.MONTH,-1);
-        defaultDate=calendar.getTime();
     }
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container,
@@ -72,23 +71,35 @@ public class PostsFragment extends Fragment implements  OnLoadMoreListener,
 
     @Override
     public void onResponse(Call<HashMap<String, Post>> call, Response<HashMap<String, Post>> response) {
-        System.out.println("success");
-        HashMap<String,Post> map=response.body();
-        if(map!=null) {
+        HashMap<String,Post> hashMap=response.body();
+        monthCount--;
+        if(hashMap!=null) {
+            System.out.println("onResponse hashmap : "+hashMap);
             ArrayList<Post> posts = new ArrayList<>();
-            for (String key : map.keySet()) {
-                posts.add(map.get(key));
-                System.out.println(map.get(key));
+            for (String key : hashMap.keySet()) {
+                posts.add(hashMap.get(key));
+                System.out.println(hashMap.get(key));
             }
             recyclerViewAdapter.removePost();//remove the null post
             recyclerViewAdapter.addPosts(posts);
-            dayCount--;
+            recyclerViewAdapter.setLoading(false);
         }
         else {
+            System.out.println("hashmap is null");
             //necesary to remove the null post when no changes are made to dataset
-            recyclerViewAdapter.removePost();
+            Calendar c=Calendar.getInstance();
+            c.add(Calendar.MONTH,monthCount);
+            if (c.get(Calendar.YEAR)>=2018) {
+
+                homePageClient.getPosts("Y"+c.get(Calendar.YEAR),
+                        "M"+c.get(Calendar.MONTH))
+                        .enqueue(this);
+            }
+            else {
+                recyclerViewAdapter.removePost();
+                recyclerViewAdapter.setLoading(false);
+            }
         }
-        recyclerViewAdapter.setLoading(false);
     }
 
     @Override
@@ -106,19 +117,11 @@ public class PostsFragment extends Fragment implements  OnLoadMoreListener,
         recyclerViewAdapter.setLoading(true);//keep this above the addPost
         recyclerViewAdapter.addPost(null);//place holder for the progress bar
 
-        /* *********Getting the date for the new set of posts ********************* */
-        Calendar c = Calendar.getInstance();
-        c.setTime(defaultDate);
-        c.add(Calendar.DATE,dayCount);
-        String dateId=dateFormat.format(c.getTime());
-        System.out.println("dateId : "+dateId);
-        /* ******************************************************************************/
 
+        Calendar c=Calendar.getInstance();
+        c.add(Calendar.MONTH,monthCount);
 
-
-        /* ************************do the download operation here********************** */
-        Call<HashMap<String,Post>> call= homePageClient.getPosts(dateId);
-        call.enqueue(PostsFragment.this);
-        /* **************************************************************************** */
+        homePageClient.getPosts("Y"+c.get(Calendar.YEAR),"M"+c.get(Calendar.MONTH))
+                .enqueue(this);
     }
 }
