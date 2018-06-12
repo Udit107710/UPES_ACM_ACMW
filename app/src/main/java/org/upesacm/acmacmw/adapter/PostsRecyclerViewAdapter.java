@@ -5,19 +5,17 @@ import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.ViewDebug;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
-import android.widget.ProgressBar;
 import android.widget.TextView;
+
+import com.bumptech.glide.Glide;
 
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.listener.OnLoadMoreListener;
 import org.upesacm.acmacmw.model.Post;
 
 import java.util.ArrayList;
-import java.util.List;
 
 public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
 
@@ -50,8 +48,11 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, int position) {
         System.out.println("onBinViewHolder Called");
-        if(holder instanceof PostViewHolder)
-            ((PostViewHolder) holder).bindData(posts.get(position));
+        System.out.println(posts.get(position));
+        if(holder instanceof PostViewHolder) {
+            Post post=posts.get(position);
+            ((PostViewHolder) holder).bindData(post);
+        }
     }
 
     @Override
@@ -74,14 +75,18 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
         private ImageView imageView;
         public PostViewHolder(View itemView) {
             super(itemView);
-            username=itemView.findViewById(R.id.username);
+            username=itemView.findViewById(R.id.editText_username);
+            imageView=itemView.findViewById(R.id.image_view_post);
         }
 
         //This function has been defined to seperate the code of binding the data with the views
         //Othewise the data binding could be done inside the Adapter's onBindViewHolder function
         public void bindData(final Post post) {
             System.out.println("bindData called");
-            username.setText(post.getImageUrl());
+            username.setText(post.getCaption());
+            Glide.with(recyclerView)
+                    .load(post.getImageUrl())
+                    .into(imageView);
         }
     }
 
@@ -103,6 +108,7 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     }
 
     public void setPosts(ArrayList<Post> posts) {
+        System.out.println("set Posts called : "+posts.size());
         this.posts=posts;
         notifyDataSetChanged();
     }

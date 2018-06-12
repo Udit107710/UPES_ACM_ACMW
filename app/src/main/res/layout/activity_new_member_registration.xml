@@ -10,7 +10,7 @@
         android:orientation="vertical">
 
         <EditText
-            android:id="@+id/m_Name"
+            android:id="@+id/editText_name"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
@@ -20,7 +20,7 @@
             android:textSize="16sp" />
 
         <EditText
-            android:id="@+id/m_Branch"
+            android:id="@+id/editText_branch"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
@@ -30,7 +30,7 @@
             android:textSize="16sp" />
 
         <EditText
-            android:id="@+id/m_Year"
+            android:id="@+id/editText_year"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
@@ -40,7 +40,7 @@
             android:textSize="16sp" />
 
         <EditText
-            android:id="@+id/m_SAPID"
+            android:id="@+id/editText_sap"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
@@ -49,16 +49,7 @@
             android:inputType="number" />
 
         <EditText
-            android:id="@+id/m_Rollno"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:hint="Roll Number"
-            android:inputType="number" />
-
-        <EditText
-            android:id="@+id/m_Email"
+            android:id="@+id/editText_email"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
@@ -69,7 +60,7 @@
             android:textSize="16sp" />
 
         <EditText
-            android:id="@+id/m_Phone"
+            android:id="@+id/editText_contact"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
@@ -80,7 +71,7 @@
             android:textSize="16sp" />
 
         <EditText
-            android:id="@+id/m_Whatsapp"
+            android:id="@+id/editText_whatsappno"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="8dp"
@@ -92,50 +83,37 @@
 
 
         <RadioGroup
-            android:id="@+id/m_RGrp"
+            android:id="@+id/radio_group_membership"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:orientation="horizontal"
+            android:layout_marginBottom="8dp"
             android:layout_marginTop="8dp"
-            android:layout_marginBottom="8dp">
+            android:orientation="horizontal">
 
             <RadioButton
-                android:id="@+id/m_Premium"
+                android:id="@+id/radio_button_premium"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="Premium" />
 
             <RadioButton
-                android:id="@+id/m_NotPremium"
+                android:id="@+id/radio_button_normal"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="Not Premium" />
+                android:text="Normal" />
         </RadioGroup>
 
-        <LinearLayout
+        <Button
+            android:id="@+id/button_register"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="horizontal">
-            <Button
-                android:id="@+id/Register"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Register"
-                android:layout_weight="1"
-                android:layout_marginLeft="8dp"
-                android:layout_marginRight="4dp"/>
+            android:layout_marginLeft="8dp"
+            android:layout_marginRight="4dp"
+            android:layout_weight="1"
+            android:text="Register" />
 
-            <Button
-                android:id="@+id/Cancel"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Cancel"
-                android:layout_weight="1"
-                android:layout_marginLeft="4dp"
-                android:layout_marginRight="8dp"/>
-        </LinearLayout>
     </LinearLayout>
 
 </ScrollView>

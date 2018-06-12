@@ -15,30 +15,34 @@ public class Post implements Parcelable {
             return new Post[i];
         }
     };
-    String imageUrl;
+
+    private String imageUrl;
+    private String caption;
+    private String memberId;
 
     public String getCaption() {
         return caption;
+    }
+
+    public String getMemberId() {
+        return memberId;
+    }
+
+    public String getImageUrl() {
+        return imageUrl;
     }
 
     public void setCaption(String caption) {
         this.caption = caption;
     }
 
-    String caption;
-
 
     public Post() {}
 
     public Post(Parcel parcel) {
         imageUrl=parcel.readString();
-    }
-
-    public Post(String imageUrl) {
-        this.imageUrl=imageUrl;
-    }
-    public String getImageUrl() {
-        return imageUrl;
+        caption=parcel.readString();
+        memberId=parcel.readString();
     }
 
     public void setImageUrl(String imageUrl) {
@@ -53,5 +57,36 @@ public class Post implements Parcelable {
     @Override
     public void writeToParcel(Parcel parcel, int i) {
         parcel.writeString(imageUrl);
+        parcel.writeString(caption);
+        parcel.writeString(memberId);
+    }
+
+    public static class Builder {
+        String imageUrl;
+        String caption;
+        String memberId;
+        public Post build() {
+            Post post=new Post();
+            post.imageUrl=imageUrl;
+            post.caption=caption;
+            post.memberId=memberId;
+
+            return post;
+        }
+
+        public Builder setImageUrl(String imageUrl) {
+            this.imageUrl=imageUrl;
+            return this;
+        }
+
+        public Builder setCaption(String caption) {
+            this.caption=caption;
+            return this;
+        }
+
+        public Builder setMemberId(String memberId) {
+            this.memberId=memberId;
+            return this;
+        }
     }
 }
