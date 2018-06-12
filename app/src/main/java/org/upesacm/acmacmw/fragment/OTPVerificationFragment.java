@@ -81,6 +81,10 @@ public class OTPVerificationFragment extends Fragment implements View.OnClickLis
         }
     }
 
+    public NewMember getVerifiedNewMember() {
+        return newMember;
+    }
+
     @Override
     public void onResponse(Call<NewMember> call, Response<NewMember> response) {
         System.out.println("Successfully fetched unconfirmed member data");
@@ -101,13 +105,13 @@ public class OTPVerificationFragment extends Fragment implements View.OnClickLis
         boolean verified=otp.equals(newMember.getOtp());
         if(verified) {
             msg="Successfully verified";
-            resultListener.onSuccessfulVerification();
+            resultListener.onSuccessfulVerification(this);
         }
         else {
             failureCount++;
             if(failureCount==MAX_TRIES) {
                 msg="Maximum Tries exceeded Please Contact ACM Membership Team";
-                resultListener.onMaxTriesExceed();
+                resultListener.onMaxTriesExceed(this);
             }
             else
                 msg="Failed to verify "+(MAX_TRIES-failureCount)+" tries left";
@@ -117,8 +121,8 @@ public class OTPVerificationFragment extends Fragment implements View.OnClickLis
     }
 
     public interface OTPVerificationResultListener {
-        public void onSuccessfulVerification();
+        public void onSuccessfulVerification(OTPVerificationFragment otpVerificationFragment);
 
-        public void onMaxTriesExceed();
+        public void onMaxTriesExceed(OTPVerificationFragment otpVerificationFragment);
     }
 }

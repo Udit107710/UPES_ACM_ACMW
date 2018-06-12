@@ -13,6 +13,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ProgressBar;
+import android.widget.RadioGroup;
 import android.widget.Toast;
 
 import org.upesacm.acmacmw.R;
@@ -38,7 +39,9 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
 
     MembershipClient membershipClient;
     Toolbar toolbar;
-    EditText editTextName,editTextSap,editTextContact,editTextEmail;
+    EditText editTextName,editTextSap,editTextContact,editTextEmail,
+            editTextYear,editTextBranch,editTextWhatsappNo;
+    RadioGroup radioGroupMembership;
     Button buttonRegister;
     NewMember newMember;
     RegistrationResultListener resultListener;
@@ -75,7 +78,13 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
        editTextName=view.findViewById(R.id.editText_name);
        editTextSap=view.findViewById(R.id.editText_sap);
        editTextEmail=view.findViewById(R.id.editText_email);
+       editTextContact=view.findViewById(R.id.editText_contact);
+       editTextYear=view.findViewById(R.id.editText_year);
+       editTextBranch=view.findViewById(R.id.editText_branch);
+       editTextWhatsappNo=view.findViewById(R.id.editText_whatsappno);
 
+       radioGroupMembership = view.findViewById(R.id.radio_group_membership);
+       radioGroupMembership.check(R.id.radio_button_premium);
 
        buttonRegister=view.findViewById(R.id.button_register);
        buttonRegister.setOnClickListener(this);
@@ -143,44 +152,65 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
             });
         }
         else {
-            resultListener.onRegistrationDataSave(NEW_MEMBER_ALREADY_PRESENT,newMember);
             resetRegistrationPage();
+            resultListener.onRegistrationDataSave(NEW_MEMBER_ALREADY_PRESENT,newMember);
         }
     }
 
     @Override
     public void onFailure(Call<NewMember> call, Throwable t) {
         System.out.println("Failed to authenticate");
-        resultListener.onRegistrationDataSave(DATA_SAVE_FAILED,newMember);
         resetRegistrationPage();
+        resultListener.onRegistrationDataSave(DATA_SAVE_FAILED,newMember);
     }
 
     public NewMember createNewMember() {
         String sap=editTextSap.getText().toString().trim();
         String name=editTextName.getText().toString().trim();
         String email=editTextEmail.getText().toString().trim();
+        String contact=editTextContact.getText().toString().trim();
+        String whatsapp=editTextWhatsappNo.getText().toString().trim();
+        String branch=editTextBranch.getText().toString().trim();
+        String year=editTextYear.getText().toString().trim();
+        boolean premium=(radioGroupMembership.getCheckedRadioButtonId()==R.id.radio_button_premium);
 
         boolean isSapValid= Pattern.compile("[\\d]{9}").matcher(sap).matches();
         boolean isNameValid=Pattern.compile("[a-zA-Z\\s]+").matcher(name).matches();
-        boolean isEmailValidi=Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")
+        boolean isEmailValid=Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")
                 .matcher(email).matches();
+        boolean isContactValid=Pattern.compile("[\\d]{10}").matcher(contact).matches();
+        boolean isWhatsappNoValid=Pattern.compile("[\\d]{10}").matcher(whatsapp).matches();
+        boolean isYearValid=Pattern.compile("[\\d]{1}").matcher(year).matches();
 
         String message="";
         if(isSapValid) {
             if(isNameValid) {
-                if(isEmailValidi) {
-                    String otp = RandomOTPGenerator.generate(Integer.parseInt(sap),email.length()+3);
-                    System.out.println("generated otp : " + otp);
-                    NewMember newMember = new NewMember.Builder()
-                            .setSapId(sap)
-                            .setFullName(name)
-                            .setEmail(email)
-                            .setOtp(otp)
-                            .build();
-                    return newMember;
+                if(isContactValid) {
+                    if(isWhatsappNoValid) {
+                        if(isYearValid) {
+                            if (isEmailValid) {
+                                String otp = RandomOTPGenerator.generate(Integer.parseInt(sap), email.length() + 3);
+                                System.out.println("generated otp : " + otp);
+                                NewMember newMember = new NewMember.Builder()
+                                        .setSapId(sap)
+                                        .setFullName(name)
+                                        .setEmail(email)
+                                        .setPhoneNo(contact)
+                                        .setYear(year)
+                                        .setBranch(branch)
+                                        .setOtp(otp)
+                                        .setPremium(premium)
+                                        .build();
+                                return newMember;
+                            } else
+                                message = "Invalid Email";
+                        } else
+                            message = "Invalid year";
+                    } else
+                        message = "Invalid Whatsapp no";
                 }
                 else
-                    message="Invalid Email";
+                    message="Invalid Contact";
             }
             else
                 message="Invalid Name";
@@ -205,6 +235,10 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
         editTextEmail.setText("");
         editTextName.setText("");
         editTextSap.setText("");
+        editTextBranch.setText("");
+        editTextWhatsappNo.setText("");
+        editTextYear.setText("");
+        editTextBranch.setText("");
 
         contentHolder.setVisibility(View.VISIBLE);
         progressBar.setVisibility(View.INVISIBLE);

@@ -23,10 +23,7 @@ public interface MembershipClient  {
     @GET("acm_acmw_members/{id}.json")
     Call<Member> getMember(@Path("id")String id);
 
-    @GET("otp")
-    Call<HashMap<String,String>> getOTPs();
-
-    @PUT("otp/{otpkey}")
-    Call<String> removeOTP(@Path("otpkey") String optkey);
+    @PUT("acm_acmw_members/{id}.json")
+    Call<Member> createMember(@Path("id")String id,@Body Member member);
 
 }

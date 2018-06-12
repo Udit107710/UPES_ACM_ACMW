@@ -63,7 +63,7 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
         /* ****************************************************************************** */
 
         FragmentTransaction ft=childFm.beginTransaction();
-        ft.replace(R.id.frameLayout_homepage,HomeFragment.newInstance(homePageClient));
+        ft.replace(R.id.frameLayout_homepage,HomeFragment.newInstance(homePageClient),"posts_fragment");
         ft.commit();
 
         return view;
