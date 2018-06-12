@@ -80,7 +80,7 @@ Uri url=null;
                 }).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
                     @Override
                     public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        url=taskSnapshot.getDownloadUrl();
+                        url=taskSnapshot.getUploadSessionUri();
                         if(url!=null)
                         {   myRef.addValueEventListener(new ValueEventListener() {
                             @Override

@@ -6,16 +6,19 @@ public class AlumniDetail {
     private String Position;
     private String Session;
     private String Image;
+    private String Contact;
+    private String Linkedin;
 
     public AlumniDetail() {
     }
 
-    public AlumniDetail(String name, String position, String session, String image) {
+    public AlumniDetail(String name, String position, String session, String image, String contact, String linkedin) {
         Name = name;
         Position = position;
         Session = session;
         Image = image;
-
+        Contact = contact;
+        Linkedin = linkedin;
     }
 
     public String getName() {
@@ -50,4 +53,19 @@ public class AlumniDetail {
         Image = image;
     }
 
+    public String getContact() {
+        return Contact;
+    }
+
+    public void setContact(String contact) {
+        Contact = contact;
+    }
+
+    public String getLinkedin() {
+        return Linkedin;
+    }
+
+    public void setLinkedin(String linkedin) {
+        Linkedin = linkedin;
+    }
 }

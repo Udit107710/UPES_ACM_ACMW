@@ -1,15 +1,16 @@
 package org.upesacm.acmacmw;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
+import android.content.Intent;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
-
-import org.w3c.dom.Text;
-
 import java.util.List;
 
 public class AlumniDetailAdapter extends RecyclerView.Adapter<AlumniDetailAdapter.DetailViewHolder>  {
@@ -30,13 +31,25 @@ public class AlumniDetailAdapter extends RecyclerView.Adapter<AlumniDetailAdapte
     }
 
     @Override
-    public void onBindViewHolder(DetailViewHolder holder, int position) {
+    public void onBindViewHolder(DetailViewHolder holder,final int position) {
 
         AlumniDetail alumniDetail= detailList.get(position);
         holder.textViewName.setText(alumniDetail.getName());
         holder.textViewDesignation.setText(alumniDetail.getPosition());
         holder.textViewSession.setText(alumniDetail.getSession());
         holder.imageView.setImageDrawable(mCtx.getResources().getDrawable(Integer.parseInt(alumniDetail.getImage())));
+
+        holder.contactim.setOnClickListener( new View.OnClickListener() {
+            @SuppressLint("MissingPermission")
+            @Override
+            public void onClick(View v) {
+                System.out.println("Write on click");
+                Intent callIntent = new Intent(Intent.ACTION_CALL);
+                String temp="tel:"+detailList.get(position).getContact();
+                //callIntent.setData(Uri.parse(temp));
+                mCtx.startActivity(callIntent);
+            }
+        });
     }
 
     @Override
@@ -50,6 +63,8 @@ public class AlumniDetailAdapter extends RecyclerView.Adapter<AlumniDetailAdapte
          TextView textViewName;
          TextView textViewDesignation;
          TextView textViewSession;
+         ImageView contactim;
+         ImageView linkedinim;
 
          public DetailViewHolder(View itemView) {
              super(itemView);
@@ -58,6 +73,8 @@ public class AlumniDetailAdapter extends RecyclerView.Adapter<AlumniDetailAdapte
              textViewName= itemView.findViewById(R.id.textViewName);
              textViewDesignation= itemView.findViewById(R.id.textViewDesignation);
              textViewSession= itemView.findViewById(R.id.textViewSession);
+             contactim= itemView.findViewById(R.id.contactim);
+             linkedinim= itemView.findViewById(R.id.linkedinim);
          }
      }
 }

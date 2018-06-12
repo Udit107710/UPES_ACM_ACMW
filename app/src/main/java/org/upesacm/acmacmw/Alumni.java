@@ -1,5 +1,6 @@
 package org.upesacm.acmacmw;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
@@ -12,6 +13,7 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -32,14 +34,14 @@ public class Alumni extends AppCompatActivity {
     AlumniDetailAdapter adapter;
     List<AlumniDetail> detailList;
     private DatabaseReference AlumniDatabase;
-    ImageView contact= (ImageView) findViewById(R.id.contact);
-    ImageView linkedin= (ImageView) findViewById(R.id.linkedin);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_alumni);
 
+        final ImageView contactim = (ImageView) findViewById(R.id.contactim);
+        ImageView linkedinim = (ImageView) findViewById(R.id.linkedinim);
         AlumniDatabase = FirebaseDatabase.getInstance().getReference().child("Alumni");
         AlumniDatabase.keepSynced(true);
 
@@ -68,12 +70,26 @@ public class Alumni extends AppCompatActivity {
         FirebaseRecyclerAdapter<AlumniDetail, AlumniViewHolder>
                 firebaseRecyclerAdapter = new FirebaseRecyclerAdapter<AlumniDetail, AlumniViewHolder>
                 (options) {
+
+
             @Override
-            protected void onBindViewHolder(@NonNull final AlumniViewHolder holder, int position, @NonNull AlumniDetail model) {
+            protected void onBindViewHolder(@NonNull final AlumniViewHolder holder, final int position, @NonNull final AlumniDetail model) {
                 holder.setName(model.getName());
                 holder.setPosition(model.getPosition());
                 holder.setSession(model.getSession());
                 holder.setImage(getApplicationContext(), model.getImage());
+
+                holder.contactim.setOnClickListener( new View.OnClickListener() {
+                    @SuppressLint("MissingPermission")
+                    @Override
+                    public void onClick(View v) {
+                        System.out.println("Write on click");
+                        Intent callIntent = new Intent(Intent.ACTION_CALL);
+                        String temp="tel:"+model.getContact();
+                        callIntent.setData(Uri.parse(temp));
+                        getApplicationContext().startActivity(callIntent);
+                    }
+                });
                 }
 
             @NonNull
@@ -89,14 +105,16 @@ public class Alumni extends AppCompatActivity {
         recyclerView.setAdapter(firebaseRecyclerAdapter);
         firebaseRecyclerAdapter.startListening();
 
+        }
     }
-}
 
 
     class AlumniViewHolder extends RecyclerView.ViewHolder {
 
-        public AlumniViewHolder(View itemView) {
+            ImageView contactim;
+            public AlumniViewHolder(View itemView) {
             super(itemView);
+            contactim= itemView.findViewById(R.id.contactim);
         }
 
         public void setName(String Name) {
@@ -118,7 +136,7 @@ public class Alumni extends AppCompatActivity {
             ImageView post_image = (ImageView) itemView.findViewById(R.id.imageView);
             Picasso.get().load(Image).into(post_image);
         }
-
     }
+
 
 

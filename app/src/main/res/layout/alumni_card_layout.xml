@@ -50,13 +50,13 @@
                 android:id="@+id/textViewSession"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_above="@+id/contact"
+                android:layout_above="@+id/contactim"
                 android:layout_alignStart="@+id/textViewName"
                 android:paddingBottom="10dp"
                 android:textSize="20sp" />
 
             <ImageView
-                android:id="@+id/contact"
+                android:id="@+id/contactim"
                 android:layout_width="35dp"
                 android:layout_height="31dp"
                 android:layout_alignBottom="@+id/imageView"
@@ -65,7 +65,7 @@
                 app:srcCompat="@drawable/contact_bottomnav" />
 
             <ImageView
-                android:id="@+id/linkedin"
+                android:id="@+id/linkedinim"
                 android:layout_width="38dp"
                 android:layout_height="31dp"
                 android:layout_alignBottom="@+id/imageView"
