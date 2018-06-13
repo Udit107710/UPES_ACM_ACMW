@@ -20,12 +20,16 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import org.upesacm.acmacmw.asynctask.OTPSender;
+import org.upesacm.acmacmw.fragment.AboutFragment;
+import org.upesacm.acmacmw.fragment.AlumniFragment;
 import org.upesacm.acmacmw.fragment.ImageUploadFragment;
 import org.upesacm.acmacmw.fragment.LoginDialogFragment;
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.fragment.HomePageFragment;
 import org.upesacm.acmacmw.fragment.MemberRegistrationFragment;
 import org.upesacm.acmacmw.fragment.OTPVerificationFragment;
+import org.upesacm.acmacmw.fragment.OngoingProjectFragment;
+import org.upesacm.acmacmw.fragment.StudyMaterialFragment;
 import org.upesacm.acmacmw.fragment.homepage.PostsFragment;
 import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.NewMember;
@@ -123,6 +127,32 @@ public class HomeActivity extends AppCompatActivity implements
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         System.out.println("onNaviagationItemSelected");
+        if(item.getItemId()==R.id.action_projects) {
+            FragmentTransaction ft=fragmentManager.beginTransaction();
+            ft.add(R.id.frame_layout, new OngoingProjectFragment());
+            ft.addToBackStack("homepage");
+            ft.commit();
+        }
+        else if(item.getItemId() == R.id.action_studymaterial) {
+            FragmentTransaction ft=fragmentManager.beginTransaction();
+            ft.add(R.id.frame_layout, new StudyMaterialFragment());
+            ft.addToBackStack("homepage");
+            ft.commit();
+        }
+        else if(item.getItemId()==R.id.action_alumni) {
+            FragmentTransaction ft=fragmentManager.beginTransaction();
+            ft.add(R.id.frame_layout, new AlumniFragment());
+            ft.addToBackStack("homepage");
+            ft.commit();
+        }
+        else if(item.getItemId() == R.id.action_about) {
+            FragmentTransaction ft=fragmentManager.beginTransaction();
+            ft.add(R.id.frame_layout,new AboutFragment());
+            ft.addToBackStack("homepage");
+            ft.commit();
+        }
+
+        drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 

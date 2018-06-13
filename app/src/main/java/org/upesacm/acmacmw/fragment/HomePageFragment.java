@@ -17,7 +17,10 @@ import android.view.ViewGroup;
 
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.activity.HomeActivity;
+import org.upesacm.acmacmw.fragment.homepage.ContactUsFragment;
+import org.upesacm.acmacmw.fragment.homepage.HierarchyFragment;
 import org.upesacm.acmacmw.fragment.homepage.PostsFragment;
+import org.upesacm.acmacmw.fragment.homepage.UpcomingEventsFragment;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 
 import java.lang.reflect.Field;
@@ -102,14 +105,26 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-        if(item.getItemId()==R.id.action_home) {
+        if(item.getItemId()==R.id.action_posts) {
             FragmentTransaction ft=childFm.beginTransaction();
             ft.add(R.id.frameLayout_homepage, PostsFragment.newInstance(homePageClient));
             ft.commit();
         }
         else if(item.getItemId()==R.id.action_upcoming_events) {
             FragmentTransaction ft=childFm.beginTransaction();
-            ft.add(R.id.frameLayout_homepage, new AlumniFragment());
+            ft.add(R.id.frameLayout_homepage, new UpcomingEventsFragment());
+            ft.addToBackStack("homepage");
+            ft.commit();
+        }
+        else if(item.getItemId() == R.id.action_heirarchy) {
+            FragmentTransaction ft=childFm.beginTransaction();
+            ft.add(R.id.frameLayout_homepage, new HierarchyFragment());
+            ft.addToBackStack("homepage");
+            ft.commit();
+        }
+        else if(item.getItemId() == R.id.action_contact) {
+            FragmentTransaction ft=childFm.beginTransaction();
+            ft.add(R.id.frameLayout_homepage, new ContactUsFragment());
             ft.addToBackStack("homepage");
             ft.commit();
         }

@@ -1,4 +1,4 @@
-package org.upesacm.acmacmw;
+package org.upesacm.acmacmw.model;
 
 public class AlumniDetail {
 

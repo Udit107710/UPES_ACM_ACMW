@@ -11,11 +11,11 @@
     </string-array>
 
     <string name="title_activity_instagram_newsfeed">InstagramNewsfeed</string>
-    <string name="title_home">Home</string>
+    <string name="title_posts">Posts</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
     <string name="title_upcoming_events">Upcoming Events</string>
-    <string name="title_available">Available Members</string>
+    <string name="title_hierarchy">Hierarchy</string>
     <string name="title_contact">Contact Us</string>
     <string name="title_myevents">My Events</string>
     <string name="title_upcmngevents">Upcoming Events</string>

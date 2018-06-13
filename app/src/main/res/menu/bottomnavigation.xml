@@ -1,20 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
 
-    <item android:id="@+id/action_home"
-        android:title="@string/title_home"
-        android:icon="@drawable/home_bottomnav" />
+    <item
+        android:id="@+id/action_posts"
+        android:icon="@drawable/home_bottomnav"
+        android:title="@string/title_posts" />
 
     <item
         android:id="@+id/action_upcoming_events"
         android:icon="@drawable/star_bottomnav"
         android:title="@string/title_upcmngevents" />
 
-    <item android:id="@+id/action_avail"
-        android:title="@string/title_available"
-        android:icon="@drawable/members_bottomnav" />
+    <item
+        android:id="@+id/action_heirarchy"
+        android:icon="@drawable/members_bottomnav"
+        android:title="@string/title_hierarchy" />
 
-    <item android:id="@+id/action_call"
+    <item android:id="@+id/action_contact"
         android:title="@string/title_contact"
         android:icon="@drawable/contact_bottomnav"/>
 
