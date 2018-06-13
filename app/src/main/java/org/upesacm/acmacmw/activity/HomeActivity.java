@@ -11,7 +11,6 @@ import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.support.v7.view.menu.MenuView;
 import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -24,11 +23,10 @@ import org.upesacm.acmacmw.asynctask.OTPSender;
 import org.upesacm.acmacmw.fragment.ImageUploadFragment;
 import org.upesacm.acmacmw.fragment.LoginDialogFragment;
 import org.upesacm.acmacmw.R;
-import org.upesacm.acmacmw.adapter.HomeViewPagerAdapter;
 import org.upesacm.acmacmw.fragment.HomePageFragment;
 import org.upesacm.acmacmw.fragment.MemberRegistrationFragment;
 import org.upesacm.acmacmw.fragment.OTPVerificationFragment;
-import org.upesacm.acmacmw.fragment.homepage.HomeFragment;
+import org.upesacm.acmacmw.fragment.homepage.PostsFragment;
 import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.NewMember;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
@@ -46,7 +44,7 @@ public class HomeActivity extends AppCompatActivity implements
         LoginDialogFragment.InteractionListener,
         MemberRegistrationFragment.RegistrationResultListener,
         OTPVerificationFragment.OTPVerificationResultListener,
-        HomeFragment.HomeFragmentInteractionListener,
+        PostsFragment.HomeFragmentInteractionListener,
         ImageUploadFragment.UploadResultListener,
         View.OnClickListener{
     private static final String BASE_URL="https://acm-acmw-app-6aa17.firebaseio.com/";

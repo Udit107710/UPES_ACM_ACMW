@@ -24,8 +24,7 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     boolean isLoading=false;
     ArrayList<Post> posts;
     private String date;
-    public PostsRecyclerViewAdapter(RecyclerView recyclerView,ArrayList<Post> posts) {
-        this.posts=posts;
+    public PostsRecyclerViewAdapter(RecyclerView recyclerView) {
         this.recyclerView=recyclerView;
         addOnScrollListener();
     }

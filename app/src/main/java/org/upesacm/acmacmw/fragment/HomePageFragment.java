@@ -9,7 +9,6 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
@@ -18,7 +17,7 @@ import android.view.ViewGroup;
 
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.activity.HomeActivity;
-import org.upesacm.acmacmw.fragment.homepage.HomeFragment;
+import org.upesacm.acmacmw.fragment.homepage.PostsFragment;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 
 import java.lang.reflect.Field;
@@ -63,7 +62,7 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
         /* ****************************************************************************** */
 
         FragmentTransaction ft=childFm.beginTransaction();
-        ft.replace(R.id.frameLayout_homepage,HomeFragment.newInstance(homePageClient),"posts_fragment");
+        ft.replace(R.id.frameLayout_homepage, PostsFragment.newInstance(homePageClient),"posts_fragment");
         ft.commit();
 
         return view;
@@ -105,7 +104,7 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
 
         if(item.getItemId()==R.id.action_home) {
             FragmentTransaction ft=childFm.beginTransaction();
-            ft.add(R.id.frameLayout_homepage, HomeFragment.newInstance(homePageClient));
+            ft.add(R.id.frameLayout_homepage, PostsFragment.newInstance(homePageClient));
             ft.commit();
         }
         else if(item.getItemId()==R.id.action_upcoming_events) {
