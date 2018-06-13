@@ -4,6 +4,7 @@
     <color name="colorPrimaryDark">#303F9F</color>
     <color name="colorAccent">#ff4081</color>
 
+    <color name="gray">#fffff0</color>
     <color name="bottom_nav_icon_tint">#ffffff</color>
     <color name="bottom_nav_icon_text">#ffffff</color>
 
