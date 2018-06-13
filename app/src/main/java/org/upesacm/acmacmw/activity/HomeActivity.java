@@ -17,6 +17,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.upesacm.acmacmw.asynctask.OTPSender;
@@ -98,14 +99,27 @@ public class HomeActivity extends AppCompatActivity implements
         navigationView.setNavigationItemSelectedListener(this);
         headerLayout=navigationView.getHeaderView(0);
         Button signin=headerLayout.findViewById(R.id.button_sign_in);
-        signin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                LoginDialogFragment loginDialogFragment =new LoginDialogFragment();
-                loginDialogFragment.show(fragmentManager,"fragment_login");
-                drawerLayout.closeDrawer(GravityCompat.START);
-            }
-        });
+        signin.setOnClickListener(this);
+
+        SharedPreferences preferences=getPreferences(Context.MODE_PRIVATE);
+        String signedInMemberSap=preferences.getString(getString(R.string.logged_in_member_key),null);
+        if(signedInMemberSap!=null) {
+            membershipClient.getMember(signedInMemberSap)
+                    .enqueue(new Callback<Member>() {
+                        @Override
+                        public void onResponse(Call<Member> call, Response<Member> response) {
+                            signedInMember=response.body();
+                            if(signedInMember!=null) {
+                                setUpMemberProfile(signedInMember);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<Member> call, Throwable t) {
+                            System.out.println("failed to fetch signed in member details");
+                        }
+                    });
+        }
     }
 
     @Override
@@ -321,6 +335,9 @@ public class HomeActivity extends AppCompatActivity implements
         headerLayout=navigationView.getHeaderView(0);
         Button signout=headerLayout.findViewById(R.id.button_sign_out);
         signout.setOnClickListener(this);
+
+        TextView textViewUsername = headerLayout.findViewById(R.id.text_view_username);
+        textViewUsername.setText(member.getName());
         /* ***********************************************************/
 
         /* *************** Adding personal corner for signed in members ***************************/
