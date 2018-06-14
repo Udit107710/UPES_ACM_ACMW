@@ -7,6 +7,7 @@
     <color name="gray">#fffff0</color>
     <color name="bottom_nav_icon_tint">#ffffff</color>
     <color name="bottom_nav_icon_text">#ffffff</color>
+    <color name="image_view_bg">#a55434</color>
 
 
 </resources>

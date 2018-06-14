@@ -1,6 +1,7 @@
 package org.upesacm.acmacmw.activity;
 
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
@@ -9,6 +10,7 @@ import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
@@ -16,11 +18,13 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import org.upesacm.acmacmw.asynctask.OTPSender;
 import org.upesacm.acmacmw.fragment.AboutFragment;
+import org.upesacm.acmacmw.fragment.AdminConsoleFragment;
 import org.upesacm.acmacmw.fragment.AlumniFragment;
 import org.upesacm.acmacmw.fragment.ImageUploadFragment;
 import org.upesacm.acmacmw.fragment.LoginDialogFragment;
@@ -30,6 +34,7 @@ import org.upesacm.acmacmw.fragment.MemberRegistrationFragment;
 import org.upesacm.acmacmw.fragment.OTPVerificationFragment;
 import org.upesacm.acmacmw.fragment.OngoingProjectFragment;
 import org.upesacm.acmacmw.fragment.StudyMaterialFragment;
+import org.upesacm.acmacmw.fragment.UserProfileFragment;
 import org.upesacm.acmacmw.fragment.homepage.PostsFragment;
 import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.NewMember;
@@ -50,8 +55,10 @@ public class HomeActivity extends AppCompatActivity implements
         OTPVerificationFragment.OTPVerificationResultListener,
         PostsFragment.HomeFragmentInteractionListener,
         ImageUploadFragment.UploadResultListener,
-        View.OnClickListener{
+        View.OnClickListener,
+        UserProfileFragment.FragmentInteractioListener{
     private static final String BASE_URL="https://acm-acmw-app-6aa17.firebaseio.com/";
+    private static final int ADMIN_CONSOLE_MENU_ID = 1;
 
     Toolbar toolbar;
     DrawerLayout drawerLayout;
@@ -127,30 +134,30 @@ public class HomeActivity extends AppCompatActivity implements
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
         System.out.println("onNaviagationItemSelected");
-        if(item.getItemId()==R.id.action_projects) {
-            FragmentTransaction ft=fragmentManager.beginTransaction();
-            ft.add(R.id.frame_layout, new OngoingProjectFragment());
-            ft.addToBackStack("homepage");
-            ft.commit();
+        FragmentTransaction ft=fragmentManager.beginTransaction();
+        if(item.getItemId() == R.id.action_home) {
+            if(!fragmentManager.popBackStackImmediate())
+                ft.add(R.id.frame_layout,HomePageFragment.newInstance(homePageClient,this));
         }
-        else if(item.getItemId() == R.id.action_studymaterial) {
-            FragmentTransaction ft=fragmentManager.beginTransaction();
-            ft.add(R.id.frame_layout, new StudyMaterialFragment());
-            ft.addToBackStack("homepage");
-            ft.commit();
+        else {
+            if(item.getItemId()==R.id.action_projects) {
+                ft.add(R.id.frame_layout, new OngoingProjectFragment());
+            }
+            else if(item.getItemId() == R.id.action_studymaterial) {
+                ft.add(R.id.frame_layout, new StudyMaterialFragment());
+            }
+            else if(item.getItemId()==R.id.action_alumni) {
+                ft.add(R.id.frame_layout, new AlumniFragment());
+            }
+            else if(item.getItemId() == R.id.action_about) {
+                ft.add(R.id.frame_layout,new AboutFragment());
+            }
+            else if(item.getItemId() == ADMIN_CONSOLE_MENU_ID) {
+                ft.add(R.id.frame_layout,new AdminConsoleFragment());
+            }
         }
-        else if(item.getItemId()==R.id.action_alumni) {
-            FragmentTransaction ft=fragmentManager.beginTransaction();
-            ft.add(R.id.frame_layout, new AlumniFragment());
-            ft.addToBackStack("homepage");
-            ft.commit();
-        }
-        else if(item.getItemId() == R.id.action_about) {
-            FragmentTransaction ft=fragmentManager.beginTransaction();
-            ft.add(R.id.frame_layout,new AboutFragment());
-            ft.addToBackStack("homepage");
-            ft.commit();
-        }
+        ft.addToBackStack("homepage");
+        ft.commit();
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
@@ -276,6 +283,7 @@ public class HomeActivity extends AppCompatActivity implements
         }
         FragmentTransaction ft=fragmentManager.beginTransaction();
         ft.replace(R.id.frame_layout,fragment,"otp_verifiction");
+        ft.addToBackStack("homepage");
         ft.commit();
     }
 
@@ -352,6 +360,11 @@ public class HomeActivity extends AppCompatActivity implements
 
     void setUpMemberProfile(Member member){
         System.out.println("setting up member profile");
+        /* ************************** Saving sign in info in locallly *********************  */
+        SharedPreferences.Editor editor=getPreferences(Context.MODE_PRIVATE).edit();
+        editor.putString(getString(R.string.logged_in_member_key),member.getSap());
+        editor.commit();
+        /* ************************************************************************************/
         this.signedInMember=member;
 
         /* ******* Change the header layout ********* */
@@ -359,47 +372,77 @@ public class HomeActivity extends AppCompatActivity implements
         navigationView.inflateHeaderView(R.layout.signed_in_header);
         /* ******************************************* */
 
-        /* Setting the listener on the sign out button */
+        /* Setting the new header components*/
         headerLayout=navigationView.getHeaderView(0);
-        Button signout=headerLayout.findViewById(R.id.button_sign_out);
-        signout.setOnClickListener(this);
+        ImageButton imageButtonProfile=headerLayout.findViewById(R.id.image_button_profile_pic);
+        imageButtonProfile.setOnClickListener(this);
 
         TextView textViewUsername = headerLayout.findViewById(R.id.text_view_username);
         textViewUsername.setText(member.getName());
         /* ***********************************************************/
 
+
         /* *************** Adding personal corner for signed in members ***************************/
         Menu navdrawerMenu = navigationView.getMenu();
         Menu submenu = navdrawerMenu.addSubMenu(Menu.NONE,Menu.NONE,Menu.FIRST,"Personalized Corner");
-        submenu.add("Edit Profile");
-        submenu.add("item 2");
+        submenu.add(Menu.NONE,ADMIN_CONSOLE_MENU_ID,Menu.NONE,"Admin Console")
+                .setCheckable(true);
         navigationView.invalidate();
         /* ******************************************************************************************************/
     }
 
-    void onSignOutClicked() {
+    public void onSignOutClicked(final UserProfileFragment userProfileFragment) {
         System.out.println("onSignOutclicked called");
 
-        /* ******************* Clear the member data from the app ***********************/
-        signedInMember=null;
-        SharedPreferences.Editor editor=getPreferences(Context.MODE_PRIVATE).edit();
-        editor.clear();
-        editor.commit();
-        /* **************************************************************************/
+        AlertDialog alertDialog=new AlertDialog.Builder(this)
+                .setMessage(getString(R.string.logout_confirmation))
+                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        /* ******************* Clear the member data from the app ***********************/
+                        signedInMember=null;
+                        SharedPreferences.Editor editor=getPreferences(Context.MODE_PRIVATE).edit();
+                        editor.clear();
+                        editor.commit();
+                        /* **************************************************************************/
 
-        /* ***Change the header layout and add again add the listener to sign in button  ******/
-        navigationView.removeHeaderView(headerLayout);
-        headerLayout = navigationView.inflateHeaderView(R.layout.nav_drawer_header);
-        Button signin=headerLayout.findViewById(R.id.button_sign_in);
-        signin.setOnClickListener(this);
-        /* ************************************************************************************/
+                        /* ***Change the header layout and add again add the listener to sign in button  ******/
+                        navigationView.removeHeaderView(headerLayout);
+                        headerLayout = navigationView.inflateHeaderView(R.layout.nav_drawer_header);
+                        Button signin=headerLayout.findViewById(R.id.button_sign_in);
+                        signin.setOnClickListener(HomeActivity.this);
+                        /* ************************************************************************************/
 
-        /* *************** Adding the logged header and menu **************************/
-        Menu navdrawerMenu = navigationView.getMenu();
-        navdrawerMenu.clear();
-        getMenuInflater().inflate(R.menu.navigationdrawer,navdrawerMenu);
-        navigationView.invalidate();
-        /* ******************************************************************************/
+                        /* *************** Adding the logged header and menu **************************/
+                        Menu navdrawerMenu = navigationView.getMenu();
+                        navdrawerMenu.clear();
+                        getMenuInflater().inflate(R.menu.navigationdrawer,navdrawerMenu);
+                        navigationView.invalidate();
+                        /* ******************************************************************************/
+
+                        FragmentTransaction ft=fragmentManager.beginTransaction();
+                        ft.detach(userProfileFragment);
+                        ft.commit();
+
+                        fragmentManager.popBackStackImmediate();
+
+                        Toast.makeText(HomeActivity.this,"Successfully Logged Out",
+                                Toast.LENGTH_SHORT).show();
+                    }
+                })
+                .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialogInterface, int i) {
+                        System.out.println("user canceled the logout action");
+                    }
+                })
+                .create();
+        alertDialog.show();
+    }
+
+    @Override
+    public void onEditClicked(UserProfileFragment fragment) {
+
     }
 
     @Override
@@ -409,8 +452,13 @@ public class HomeActivity extends AppCompatActivity implements
             loginDialogFragment.show(fragmentManager,"fragment_login");
             drawerLayout.closeDrawer(GravityCompat.START);
         }
-        else if(view.getId()==R.id.button_sign_out) {
-            onSignOutClicked();
+        else if(view.getId() == R.id.image_button_profile_pic) {
+            UserProfileFragment userProfileFragment=UserProfileFragment.newInstance(signedInMember);
+            FragmentTransaction ft=fragmentManager.beginTransaction();
+            ft.addToBackStack("homepage");
+            ft.add(R.id.frame_layout,userProfileFragment);
+            ft.commit();
+            drawerLayout.closeDrawer(GravityCompat.START);
         }
     }
 }

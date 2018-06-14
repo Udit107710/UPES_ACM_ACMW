@@ -21,7 +21,9 @@ import retrofit2.Response;
 public class OTPVerificationFragment extends Fragment implements View.OnClickListener, Callback<NewMember> {
     static final int MAX_TRIES=10;
     EditText editTextOTP;
+    EditText editTextSap;
     Button buttonVerify;
+    Button buttonNewSap;
     String otp;
     String sap;
     MembershipClient membershipClient;
@@ -57,8 +59,13 @@ public class OTPVerificationFragment extends Fragment implements View.OnClickLis
         System.out.println("inside oncreate view of otpverification fragment");
         View view=inflater.inflate(R.layout.fragment_otpverification, container, false);
         editTextOTP=view.findViewById(R.id.editText_otp);
+        editTextSap = view.findViewById(R.id.editText_sap_verify);
         buttonVerify=view.findViewById(R.id.button_verify);
+        buttonNewSap = view.findViewById(R.id.button_newsap);
+
         buttonVerify.setOnClickListener(this);
+        buttonNewSap.setOnClickListener(this);
+
 
         Bundle args=getArguments();
         if(args!=null) {
@@ -69,15 +76,26 @@ public class OTPVerificationFragment extends Fragment implements View.OnClickLis
 
     @Override
     public void onClick(View view) {
-        otp=editTextOTP.getText().toString().trim();
-        System.out.println("OTP Entered by user : "+otp);
-
-        if(newMember==null) {
-            Call<NewMember> newMemberCall = membershipClient.getNewMemberData(sap);
-            newMemberCall.enqueue(this);
+        /* when verify button is pressed */
+        if(view.getId() == R.id.button_verify) {
+            otp = editTextOTP.getText().toString().trim();
+            System.out.println("OTP Entered by user : " + otp);
+            if(editTextSap.getVisibility() == View.VISIBLE) {
+                String newsap= editTextSap.getText().toString().trim();
+                membershipClient.getNewMemberData(newsap)
+                        .enqueue(this);
+            }
+            else {
+                if (newMember == null) {
+                    membershipClient.getNewMemberData(sap)
+                            .enqueue(this);
+                } else {
+                    verify();
+                }
+            }
         }
-        else {
-            verify();
+        else if(view.getId() == R.id.button_newsap) {
+            editTextSap.setVisibility(View.VISIBLE);
         }
     }
 
@@ -89,8 +107,9 @@ public class OTPVerificationFragment extends Fragment implements View.OnClickLis
     public void onResponse(Call<NewMember> call, Response<NewMember> response) {
         System.out.println("Successfully fetched unconfirmed member data");
         newMember=response.body();
-        if(newMember==null)
-            throw new IllegalStateException("Locally saved but not in database. Try reinstalling the application");
+        if(newMember==null) {
+            Toast.makeText(getContext(),"No data availabe for "+sap,Toast.LENGTH_LONG).show();
+        }
         verify();
     }
 
@@ -121,8 +140,8 @@ public class OTPVerificationFragment extends Fragment implements View.OnClickLis
     }
 
     public interface OTPVerificationResultListener {
-        public void onSuccessfulVerification(OTPVerificationFragment otpVerificationFragment);
+        void onSuccessfulVerification(OTPVerificationFragment otpVerificationFragment);
 
-        public void onMaxTriesExceed(OTPVerificationFragment otpVerificationFragment);
+        void onMaxTriesExceed(OTPVerificationFragment otpVerificationFragment);
     }
 }

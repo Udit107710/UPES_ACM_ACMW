@@ -125,6 +125,7 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
                                         if(response.code()==200) {
                                             MemberRegistrationFragment.this.saveSignUpInfoLocally();
                                             resultListener.onRegistrationDataSave(DATA_SAVE_SUCCESSFUL,newMember);
+                                            resetRegistrationPage();
                                         }
                                         else {
                                             resultListener.onRegistrationDataSave(DATA_SAVE_FAILED, newMember);
@@ -189,7 +190,7 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
                     if(isWhatsappNoValid) {
                         if(isYearValid) {
                             if (isEmailValid) {
-                                String otp = RandomOTPGenerator.generate(Integer.parseInt(sap), email.length() + 3);
+                                String otp = RandomOTPGenerator.generate(Integer.parseInt(sap),  6);
                                 System.out.println("generated otp : " + otp);
                                 NewMember newMember = new NewMember.Builder()
                                         .setSapId(sap)

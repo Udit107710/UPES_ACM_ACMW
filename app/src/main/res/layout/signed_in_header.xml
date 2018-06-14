@@ -8,9 +8,9 @@
 
     <ImageButton
         android:id="@+id/image_button_profile_pic"
-        android:layout_width="99dp"
-        android:layout_height="101dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="70dp"
+        android:layout_height="70dp"
+        android:layout_marginStart="16dp"
         android:layout_marginTop="32dp"
         android:background="@drawable/round_button"
         app:layout_constraintStart_toStartOf="parent"
@@ -29,18 +29,6 @@
         app:layout_constraintStart_toEndOf="@+id/image_button_profile_pic"
         app:layout_constraintTop_toTopOf="parent" />
 
-    <Button
-        android:id="@+id/button_sign_out"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginEnd="8dp"
-        android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
-        android:text="sign out"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toEndOf="@+id/image_button_profile_pic"
-        app:layout_constraintTop_toBottomOf="@+id/textView9" />
-
     <TextView
         android:id="@+id/text_view_username"
         android:layout_width="wrap_content"
@@ -48,7 +36,7 @@
         android:layout_marginBottom="16dp"
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
-        android:layout_marginTop="8dp"
+        android:layout_marginTop="32dp"
         android:text="TextView"
         android:textAlignment="center"
         android:textColor="@android:color/white"
