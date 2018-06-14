@@ -71,7 +71,7 @@
                 android:layout_alignBottom="@+id/imageView"
                 android:layout_alignParentEnd="true"
                 android:layout_marginEnd="11dp"
-                app:srcCompat="@drawable/linkedin" />
+                app:srcCompat="@drawable/linkedin1" />
 
         </RelativeLayout>
 
