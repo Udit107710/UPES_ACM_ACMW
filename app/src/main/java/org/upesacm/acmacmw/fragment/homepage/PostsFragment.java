@@ -279,7 +279,6 @@ public class PostsFragment extends Fragment
 
 
 
-
     public interface HomeFragmentInteractionListener{
         void onNewPostDataAvailable(Bundle args);
     }

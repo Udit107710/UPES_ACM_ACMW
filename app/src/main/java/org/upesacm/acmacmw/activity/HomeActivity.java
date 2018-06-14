@@ -5,6 +5,7 @@ import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.view.GravityCompat;
@@ -26,6 +27,7 @@ import org.upesacm.acmacmw.asynctask.OTPSender;
 import org.upesacm.acmacmw.fragment.AboutFragment;
 import org.upesacm.acmacmw.fragment.AdminConsoleFragment;
 import org.upesacm.acmacmw.fragment.AlumniFragment;
+import org.upesacm.acmacmw.fragment.EditProfileFragment;
 import org.upesacm.acmacmw.fragment.ImageUploadFragment;
 import org.upesacm.acmacmw.fragment.LoginDialogFragment;
 import org.upesacm.acmacmw.R;
@@ -56,7 +58,8 @@ public class HomeActivity extends AppCompatActivity implements
         PostsFragment.HomeFragmentInteractionListener,
         ImageUploadFragment.UploadResultListener,
         View.OnClickListener,
-        UserProfileFragment.FragmentInteractioListener{
+        UserProfileFragment.FragmentInteractioListener,
+        EditProfileFragment.FragmentInteractionListener{
     private static final String BASE_URL="https://acm-acmw-app-6aa17.firebaseio.com/";
     private static final int ADMIN_CONSOLE_MENU_ID = 1;
 
@@ -136,8 +139,9 @@ public class HomeActivity extends AppCompatActivity implements
         System.out.println("onNaviagationItemSelected");
         FragmentTransaction ft=fragmentManager.beginTransaction();
         if(item.getItemId() == R.id.action_home) {
-            if(!fragmentManager.popBackStackImmediate())
-                ft.add(R.id.frame_layout,HomePageFragment.newInstance(homePageClient,this));
+            if(!fragmentManager.popBackStackImmediate()) {
+                ft.replace(R.id.frame_layout, HomePageFragment.newInstance(homePageClient, this));
+            }
         }
         else {
             if(item.getItemId()==R.id.action_projects) {
@@ -156,13 +160,94 @@ public class HomeActivity extends AppCompatActivity implements
                 ft.add(R.id.frame_layout,new AdminConsoleFragment());
             }
         }
-        ft.addToBackStack("homepage");
         ft.commit();
 
         drawerLayout.closeDrawer(GravityCompat.START);
         return true;
     }
 
+    @Override
+    public void onClick(View view) {
+        if(view.getId()==R.id.button_sign_in) {
+            LoginDialogFragment loginDialogFragment =new LoginDialogFragment();
+            loginDialogFragment.show(fragmentManager,"fragment_login");
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }
+        else if(view.getId() == R.id.image_button_profile_pic) {
+            UserProfileFragment userProfileFragment=UserProfileFragment.newInstance(signedInMember);
+            FragmentTransaction ft=fragmentManager.beginTransaction();
+            ft.addToBackStack("homepage");
+            ft.add(R.id.frame_layout,userProfileFragment);
+            ft.commit();
+            drawerLayout.closeDrawer(GravityCompat.START);
+        }
+    }
+
+    public void setDrawerEnabled(boolean enable) {
+        int lockMode=enable?DrawerLayout.LOCK_MODE_UNLOCKED:DrawerLayout.
+                LOCK_MODE_LOCKED_CLOSED;
+        drawerLayout.setDrawerLockMode(lockMode);
+        toggle.setDrawerIndicatorEnabled(enable);
+
+    }
+
+    public void setActionBarTitle(String title) {
+        toolbar.setTitle(title);
+    }
+
+    public void startOTPVerificationPage(NewMember newMember) {
+        OTPVerificationFragment fragment;
+        if(newMember!=null) {
+            fragment=OTPVerificationFragment.newInstance(membershipClient, newMember.getSapId());
+            Bundle bundle = new Bundle();
+            bundle.putParcelable(getString(R.string.new_member_key), newMember);
+            fragment.setArguments(bundle);
+        }
+        else {
+            fragment=OTPVerificationFragment.newInstance(membershipClient,newMemberSap);
+        }
+        FragmentTransaction ft=fragmentManager.beginTransaction();
+        ft.replace(R.id.frame_layout,fragment,"otp_verifiction");
+        ft.addToBackStack("homepage");
+        ft.commit();
+    }
+
+    void setUpMemberProfile(Member member){
+        System.out.println("setting up member profile");
+        /* ************************** Saving sign in info in locallly *********************  */
+        SharedPreferences.Editor editor=getPreferences(Context.MODE_PRIVATE).edit();
+        editor.putString(getString(R.string.logged_in_member_key),member.getSap());
+        editor.commit();
+        /* ************************************************************************************/
+        this.signedInMember=member;
+
+        /* ******* Change the header layout ********* */
+        navigationView.removeHeaderView(headerLayout);
+        navigationView.inflateHeaderView(R.layout.signed_in_header);
+        /* ******************************************* */
+
+        /* Setting the new header components*/
+        headerLayout=navigationView.getHeaderView(0);
+        ImageButton imageButtonProfile=headerLayout.findViewById(R.id.image_button_profile_pic);
+        imageButtonProfile.setOnClickListener(this);
+
+        TextView textViewUsername = headerLayout.findViewById(R.id.text_view_username);
+        textViewUsername.setText(member.getName());
+        /* ***********************************************************/
+
+
+        /* *************** Adding personal corner for signed in members ***************************/
+        Menu navdrawerMenu = navigationView.getMenu();
+        Menu submenu = navdrawerMenu.addSubMenu(Menu.NONE,Menu.NONE,Menu.FIRST,"Personalized Corner");
+        submenu.add(Menu.NONE,ADMIN_CONSOLE_MENU_ID,Menu.NONE,"Admin Console")
+                .setCheckable(true);
+        navigationView.invalidate();
+        /* ******************************************************************************************************/
+    }
+
+
+
+    /* $$$$$$$$$$$$$$$$$$$$$$$$ Callbacks of LoginDialogFragment $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ */
     @Override
     public void onLoginPressed(LoginDialogFragment loginDialogFragment) {
         System.out.println("login button pressed");
@@ -232,19 +317,12 @@ public class HomeActivity extends AppCompatActivity implements
         System.out.println("Cancel button pressed");
         loginDialogFragment.dismiss();
     }
+    /* $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ */
 
-    public void setDrawerEnabled(boolean enable) {
-        int lockMode=enable?DrawerLayout.LOCK_MODE_UNLOCKED:DrawerLayout.
-                LOCK_MODE_LOCKED_CLOSED;
-        drawerLayout.setDrawerLockMode(lockMode);
-        toggle.setDrawerIndicatorEnabled(enable);
 
-    }
 
-    public void setActionBarTitle(String title) {
-        toolbar.setTitle(title);
-    }
 
+    /* ********************** Callback from MemberRegistrationFragment ************************ */
     @Override
     public void onRegistrationDataSave(int resultCode, NewMember newMember) {
         System.out.println("result code is : "+resultCode);
@@ -270,23 +348,12 @@ public class HomeActivity extends AppCompatActivity implements
         Toast.makeText(this,msg,Toast.LENGTH_SHORT).show();
     }
 
-    public void startOTPVerificationPage(NewMember newMember) {
-        OTPVerificationFragment fragment;
-        if(newMember!=null) {
-            fragment=OTPVerificationFragment.newInstance(membershipClient, newMember.getSapId());
-            Bundle bundle = new Bundle();
-            bundle.putParcelable(getString(R.string.new_member_key), newMember);
-            fragment.setArguments(bundle);
-        }
-        else {
-            fragment=OTPVerificationFragment.newInstance(membershipClient,newMemberSap);
-        }
-        FragmentTransaction ft=fragmentManager.beginTransaction();
-        ft.replace(R.id.frame_layout,fragment,"otp_verifiction");
-        ft.addToBackStack("homepage");
-        ft.commit();
-    }
+    /* ******************************************************************************************/
 
+
+
+
+    /* ########################### Callback from OTPVerificationFragment ######################## */
     @Override
     public void onSuccessfulVerification(final OTPVerificationFragment otpVerificationFragment) {
         System.out.println("successfully verified");
@@ -340,7 +407,12 @@ public class HomeActivity extends AppCompatActivity implements
                 .detach(otpVerificationFragment)
                 .commit();
     }
+    /* ###########################################################################################*/
 
+
+
+
+    /* @@@@@@@@@@@@@@@@@@@@@@@@Callback from PostFragment @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
     @Override
     public void onNewPostDataAvailable(Bundle args) {
         System.out.println("on new post data available called");
@@ -352,45 +424,23 @@ public class HomeActivity extends AppCompatActivity implements
         ft.add(R.id.frame_layout,imageUploadFragment,"image_upload_fragment");
         ft.commit();
     }
+    /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
 
+
+
+
+    /* !!!!!!!!!!!!!!!!!!!!!! Callback from ImageUploadFragment !!!!!!!!!!!!!!!!!!!!!!!!!!!!! */
     @Override
     public void onUpload(ImageUploadFragment imageUploadFragment,int resultCode) {
             fragmentManager.beginTransaction().detach(imageUploadFragment).commit();
     }
-
-    void setUpMemberProfile(Member member){
-        System.out.println("setting up member profile");
-        /* ************************** Saving sign in info in locallly *********************  */
-        SharedPreferences.Editor editor=getPreferences(Context.MODE_PRIVATE).edit();
-        editor.putString(getString(R.string.logged_in_member_key),member.getSap());
-        editor.commit();
-        /* ************************************************************************************/
-        this.signedInMember=member;
-
-        /* ******* Change the header layout ********* */
-        navigationView.removeHeaderView(headerLayout);
-        navigationView.inflateHeaderView(R.layout.signed_in_header);
-        /* ******************************************* */
-
-        /* Setting the new header components*/
-        headerLayout=navigationView.getHeaderView(0);
-        ImageButton imageButtonProfile=headerLayout.findViewById(R.id.image_button_profile_pic);
-        imageButtonProfile.setOnClickListener(this);
-
-        TextView textViewUsername = headerLayout.findViewById(R.id.text_view_username);
-        textViewUsername.setText(member.getName());
-        /* ***********************************************************/
+    /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
 
-        /* *************** Adding personal corner for signed in members ***************************/
-        Menu navdrawerMenu = navigationView.getMenu();
-        Menu submenu = navdrawerMenu.addSubMenu(Menu.NONE,Menu.NONE,Menu.FIRST,"Personalized Corner");
-        submenu.add(Menu.NONE,ADMIN_CONSOLE_MENU_ID,Menu.NONE,"Admin Console")
-                .setCheckable(true);
-        navigationView.invalidate();
-        /* ******************************************************************************************************/
-    }
 
+
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%Callback from UserProfileFragment %%%%%%%%%%%%%%%%%%%%%%%%%%%% */
+    @Override
     public void onSignOutClicked(final UserProfileFragment userProfileFragment) {
         System.out.println("onSignOutclicked called");
 
@@ -442,23 +492,46 @@ public class HomeActivity extends AppCompatActivity implements
 
     @Override
     public void onEditClicked(UserProfileFragment fragment) {
+        System.out.println("on edit clicked");
+        fragmentManager.beginTransaction()
+                .detach(fragment)
+                .commit();
 
+        FragmentTransaction ft = fragmentManager.beginTransaction();
+        ft.add(R.id.frame_layout,EditProfileFragment.newInstance(membershipClient,signedInMember));
+        ft.addToBackStack(null);
+        ft.commit();
     }
+    /* %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% */
 
+
+
+
+    /* &&&&&&&&&&&&&&&&&&&&&&&Callback from EditProfileFragment&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&*/
     @Override
-    public void onClick(View view) {
-        if(view.getId()==R.id.button_sign_in) {
-            LoginDialogFragment loginDialogFragment =new LoginDialogFragment();
-            loginDialogFragment.show(fragmentManager,"fragment_login");
-            drawerLayout.closeDrawer(GravityCompat.START);
+    public void onDataEditResult(EditProfileFragment fragment, int resultCode,Member member) {
+        fragmentManager.beginTransaction().detach(fragment).commit();
+        String msg="";
+        switch (resultCode) {
+            case EditProfileFragment.SUCESSFULLY_SAVED_NEW_DATA : {
+                msg="Saved";
+                signedInMember = member;
+                setUpMemberProfile(member);
+                break;
+            }
+
+            case EditProfileFragment.FAILED_TO_SAVE_NEW_DATA : {
+                msg="Some error occured. please Try again later";
+                break;
+            }
+
+            case EditProfileFragment.ACTION_CANCELLED_BY_USER : {
+                fragmentManager.popBackStackImmediate();
+                msg="Cancelled";
+            }
+
         }
-        else if(view.getId() == R.id.image_button_profile_pic) {
-            UserProfileFragment userProfileFragment=UserProfileFragment.newInstance(signedInMember);
-            FragmentTransaction ft=fragmentManager.beginTransaction();
-            ft.addToBackStack("homepage");
-            ft.add(R.id.frame_layout,userProfileFragment);
-            ft.commit();
-            drawerLayout.closeDrawer(GravityCompat.START);
-        }
+        Toast.makeText(this,msg,Toast.LENGTH_SHORT).show();
     }
+    /* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&*/
 }
