@@ -36,7 +36,7 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
         // Required empty public constructor
     }
 
-    public static Fragment newInstance(HomePageClient homePageClient,Context context) {
+    public static HomePageFragment newInstance(HomePageClient homePageClient,Context context) {
         HomePageFragment homePageFragment=new HomePageFragment();
         homePageFragment.homePageClient=homePageClient;
         homePageFragment.context=context;

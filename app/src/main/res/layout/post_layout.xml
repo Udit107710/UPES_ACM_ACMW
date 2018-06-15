@@ -17,17 +17,17 @@
         android:layout_height="match_parent">
 
         <TextView
-            android:id="@+id/editText_username"
+            android:id="@+id/text_view_post_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="4dp"
             android:layout_marginStart="8dp"
-            android:layout_marginTop="8dp"
-            android:paddingStart="20dp"
+            android:layout_marginTop="4dp"
             android:text="Name"
-            android:textSize="20dp"
+            android:textColor="@android:color/black"
+            android:textSize="14sp"
             app:layout_constraintBottom_toTopOf="@+id/image_view_post"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
@@ -37,18 +37,20 @@
             android:layout_width="370dp"
             android:layout_height="350dp"
             android:layout_alignParentStart="true"
-            android:layout_below="@+id/editText_username"
+            android:layout_below="@+id/text_view_post_username"
             android:layout_marginEnd="1dp"
+
+            android:background="@android:color/black"
             app:layout_constraintBottom_toTopOf="@+id/linearLayout"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/editText_username"
+            app:layout_constraintTop_toBottomOf="@+id/text_view_post_username"
             app:srcCompat="@drawable/ic_launcher_background" />
 
         <LinearLayout
             android:id="@+id/linearLayout"
-            android:layout_width="370dp"
-            android:layout_height="58dp"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
             android:layout_alignParentBottom="true"
             android:layout_alignParentStart="true"
             app:layout_constraintBottom_toBottomOf="parent"
@@ -56,32 +58,32 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@+id/image_view_post">
 
+            <TextView
+                android:id="@+id/text_view_post_caption"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:padding="8dp"
+                android:text="TextView"
+                android:textAlignment="viewStart"
+                android:textColor="@android:color/black" />
+
+            <TextView
+                android:id="@+id/text_view_post_likecount"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="0"
+                android:padding="8dp"
+                android:text="0" />
+
             <ImageButton
-                android:id="@+id/image_button_like"
+                android:id="@+id/image_button_post_like"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
                 android:background="@null"
-                android:paddingEnd="45dp"
-                android:paddingStart="45dp"
+                android:paddingLeft="16dp"
+                android:paddingRight="16dp"
                 android:src="@drawable/like" />
-
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:src="@drawable/comment"
-                android:background="@null"
-                android:paddingStart="45dp"
-                android:paddingEnd="45dp"
-                />
-
-            <ImageButton
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:src="@drawable/share"
-                android:background="@null"
-                android:paddingStart="45dp"
-                android:paddingEnd="45dp"
-                />
 
 
         </LinearLayout>

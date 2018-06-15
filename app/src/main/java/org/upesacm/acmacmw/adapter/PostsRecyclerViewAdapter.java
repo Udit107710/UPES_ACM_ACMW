@@ -6,6 +6,7 @@ import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
 
@@ -14,6 +15,7 @@ import com.bumptech.glide.Glide;
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.listener.OnLoadMoreListener;
 import org.upesacm.acmacmw.model.Post;
+import org.upesacm.acmacmw.retrofit.HomePageClient;
 
 import java.util.ArrayList;
 
@@ -23,9 +25,10 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     private RecyclerView recyclerView;
     boolean isLoading=false;
     ArrayList<Post> posts;
-    private String date;
-    public PostsRecyclerViewAdapter(RecyclerView recyclerView) {
+    HomePageClient homePageClient;
+    public PostsRecyclerViewAdapter(RecyclerView recyclerView, HomePageClient homePageClient) {
         this.recyclerView=recyclerView;
+        this.homePageClient = homePageClient;
         addOnScrollListener();
     }
     @Override
@@ -71,22 +74,46 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
 
     public class PostViewHolder extends RecyclerView.ViewHolder {
         private TextView username;
+        private TextView textViewCaption;
         private ImageView imageView;
+        private ImageButton imageButtonLike;
+        private TextView textViewLikeCount;
+        private Post post;
         public PostViewHolder(View itemView) {
             super(itemView);
-            username=itemView.findViewById(R.id.editText_username);
+            username=itemView.findViewById(R.id.text_view_post_username);
+            textViewCaption = itemView.findViewById(R.id.text_view_post_caption);
             imageView=itemView.findViewById(R.id.image_view_post);
+            imageButtonLike = itemView.findViewById(R.id.image_button_post_like);
+            textViewLikeCount = itemView.findViewById(R.id.text_view_post_likecount);
         }
 
         //This function has been defined to seperate the code of binding the data with the views
         //Othewise the data binding could be done inside the Adapter's onBindViewHolder function
         public void bindData(final Post post) {
             System.out.println("bindData called");
-            username.setText(post.getCaption());
+            this.post=post;
+            username.setText(post.getMemberId());
+            textViewCaption.setText(post.getCaption());
             Glide.with(recyclerView)
                     .load(post.getImageUrl())
                     .into(imageView);
+            textViewLikeCount.setText("in progress");
         }
+
+//        @Override
+//        public void onClick(View view) {
+//            Post modifiedPost=new Post.Builder()
+//                    .setMemberId(post.getMemberId())
+//                    .setCaption(post.getCaption())
+//                    .setPostId(post.getPostId())
+//                    .setImageUrl(post.getImageUrl())
+//                    .setLikesCount(post.getLikesCount()+1)
+//                    .setMonthId(post.getMonthid())
+//                    .setYearId(post.getPostId())
+//                    .build();
+//            homePageClient.createPost(modifiedPost.
+//        }
     }
 
     public class LoadingViewHolder extends RecyclerView.ViewHolder {

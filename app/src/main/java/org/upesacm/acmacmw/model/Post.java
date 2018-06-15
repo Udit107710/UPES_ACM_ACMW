@@ -3,6 +3,8 @@ package org.upesacm.acmacmw.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.util.ArrayList;
+
 public class Post implements Parcelable {
     public static final Parcelable.Creator CREATOR = new Parcelable.Creator(){
 
@@ -19,6 +21,26 @@ public class Post implements Parcelable {
     private String imageUrl;
     private String caption;
     private String memberId;
+    private String yearId;
+    private String monthid;
+    private ArrayList<String> likesIds;
+    private String postId;
+
+    public String getPostId() {
+        return postId;
+    }
+
+    public String getYearId() {
+        return yearId;
+    }
+
+    public String getMonthid() {
+        return monthid;
+    }
+
+    public ArrayList<String> getLikesIds() {
+        return likesIds;
+    }
 
     public String getCaption() {
         return caption;
@@ -32,10 +54,6 @@ public class Post implements Parcelable {
         return imageUrl;
     }
 
-    public void setCaption(String caption) {
-        this.caption = caption;
-    }
-
 
     public Post() {}
 
@@ -45,9 +63,6 @@ public class Post implements Parcelable {
         memberId=parcel.readString();
     }
 
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl=imageUrl;
-    }
 
     @Override
     public int describeContents() {
@@ -65,12 +80,20 @@ public class Post implements Parcelable {
         String imageUrl;
         String caption;
         String memberId;
+        String yearId;
+        String monthId;
+        String postId;
+        ArrayList<String> likesIds;
+
         public Post build() {
             Post post=new Post();
+            post.yearId=yearId;
+            post.monthid=monthId;
             post.imageUrl=imageUrl;
             post.caption=caption;
             post.memberId=memberId;
-
+            post.likesIds=likesIds;
+            post.postId=postId;
             return post;
         }
 
@@ -86,6 +109,26 @@ public class Post implements Parcelable {
 
         public Builder setMemberId(String memberId) {
             this.memberId=memberId;
+            return this;
+        }
+
+        public Builder setYearId(String yearId) {
+            this.yearId=yearId;
+            return this;
+        }
+
+        public Builder setMonthId(String monthId) {
+            this.monthId=monthId;
+            return this;
+        }
+
+        public Builder setLikesCount(ArrayList<String> count) {
+            this.likesIds=likesIds;
+            return this;
+        }
+
+        public Builder setPostId(String postId) {
+            this.postId=postId;
             return this;
         }
     }

@@ -24,11 +24,4 @@ public interface HomePageClient {
     @PUT("posts/{year}/{month}/{id}.json")
     Call<Post> createPost(@Path("year")String year, @Path("month")String month,
                           @Path("id") String id,@Body Post post);
-
-    @GET("postCount")
-    Call<Integer> getPostCount();
-
-    @GET("postCount")
-    Call<Integer> setPostCount(@Body int count);
-
 }

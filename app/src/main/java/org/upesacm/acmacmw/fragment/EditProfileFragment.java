@@ -143,11 +143,13 @@ public class EditProfileFragment extends Fragment
                     if (isYearValid) {
                         Member modifiedMember = new Member.Builder()
                                 .setSAPId(member.getSap())
+                                .setmemberId(member.getMemberId())
                                 .setName(name)
                                 .setEmail(email)
                                 .setContact(contact)
                                 .setYear(year)
                                 .setBranch(branch)
+                                .setPassword(member.getPassword())
                                 .build();
                                 return modifiedMember;
                     } else

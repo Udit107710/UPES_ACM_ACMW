@@ -8,6 +8,8 @@
     <color name="bottom_nav_icon_tint">#ffffff</color>
     <color name="bottom_nav_icon_text">#ffffff</color>
     <color name="image_view_bg">#a55434</color>
+    <color name="caption_bg">#96000000</color>
+    <color name="caption_fg">#dbd6d6</color>
 
 
 </resources>

@@ -237,6 +237,7 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
         editTextName.setText("");
         editTextSap.setText("");
         editTextBranch.setText("");
+        editTextContact.setText("");
         editTextWhatsappNo.setText("");
         editTextYear.setText("");
         editTextBranch.setText("");

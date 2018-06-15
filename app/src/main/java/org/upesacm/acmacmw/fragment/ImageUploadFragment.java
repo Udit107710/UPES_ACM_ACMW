@@ -18,6 +18,7 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCanceledListener;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -45,10 +46,13 @@ public class ImageUploadFragment extends Fragment implements
         OnSuccessListener<UploadTask.TaskSnapshot>,
         OnFailureListener,
         OnProgressListener<UploadTask.TaskSnapshot>,
-        OnPausedListener<UploadTask.TaskSnapshot>{
+        OnPausedListener<UploadTask.TaskSnapshot>,
+        OnCanceledListener{
 
     public static final int UPLOAD_SUCCESSFUL=1;
-    public static final int UPLOAD_FAILED=2;
+    public static final int UPLOAD_CANCELLED=2;
+    public static final int UPLOAD_CANCEL_OPERATION_FAILED=4;
+    public static final int UPLOAD_FAILED=3;
 
     HomePageClient homePageClient;
     byte[] byteArray;
@@ -61,13 +65,21 @@ public class ImageUploadFragment extends Fragment implements
     StorageReference storageRef = storage.getReference();
     UploadResultListener resultListener;
     TextView textViewUpload;
+    String memberId;
+    String yearId;
+    String monthId;
+    String postId;
+    UploadTask uploadTask;
     public ImageUploadFragment() {
         // Required empty public constructor
     }
 
-    public static ImageUploadFragment newInstance(HomePageClient homePageClient) {
+    public static ImageUploadFragment newInstance(HomePageClient homePageClient,String memberId) {
         ImageUploadFragment fragment = new ImageUploadFragment();
         fragment.homePageClient=homePageClient;
+        fragment.memberId=memberId;
+
+        System.out.println("fragment constructor : "+memberId);
         return fragment;
     }
 
@@ -98,22 +110,36 @@ public class ImageUploadFragment extends Fragment implements
         progressBar = view.findViewById(R.id.progress_bar_upload);
         textViewUpload = view.findViewById(R.id.text_view_upload);
 
-        final Calendar calendar=Calendar.getInstance();
-
         upload.setOnClickListener(this);
         return view;
+    }
+
+    @Override
+    public void onDestroyView() {
+        System.out.println("on destroy view image upload frag");
+        System.out.println("upload task : "+uploadTask);
+        if(uploadTask!=null && !uploadTask.isComplete())
+            if(!uploadTask.cancel())
+                resultListener.onUpload(this,UPLOAD_CANCEL_OPERATION_FAILED);
+        super.onDestroyView();
     }
 
     @Override
     public void onClick(View view) {
         System.out.println("upload button clicked");
         showProgress(true);
-        storageRef = storageRef.child(caption.getText().toString()+".png");
-        UploadTask uploadTask =  storageRef.putBytes(byteArray);
+        Calendar calendar=Calendar.getInstance();
+        yearId="Y"+calendar.get(Calendar.YEAR);
+        monthId="M"+calendar.get(Calendar.MONTH);
+        postId=memberId+Calendar.getInstance().getTimeInMillis();
+
+        storageRef = storageRef.child(memberId+"/"+postId+".png");
+        uploadTask =  storageRef.putBytes(byteArray);
         uploadTask.addOnSuccessListener(this)
                 .addOnFailureListener(this)
                 .addOnProgressListener(this)
-                .addOnPausedListener(this);
+                .addOnPausedListener(this)
+                .addOnCanceledListener(this);
     }
 
     public void showProgress(boolean show) {
@@ -130,19 +156,7 @@ public class ImageUploadFragment extends Fragment implements
         }
     }
 
-    @Override
-    public void onResponse(Call<Post> call, Response<Post> response) {
-        System.out.println("Post Metadata saved successfully");
-        Toast.makeText(getContext(),"New Post uploaded",Toast.LENGTH_LONG).show();
-        resultListener.onUpload(this,ImageUploadFragment.UPLOAD_SUCCESSFUL);
-    }
 
-    @Override
-    public void onFailure(Call<Post> call, Throwable t) {
-        System.out.println("posting of meta data failed");
-        Toast.makeText(getContext(),"Post upload failed",Toast.LENGTH_LONG).show();
-        resultListener.onUpload(this,ImageUploadFragment.UPLOAD_FAILED);
-    }
 
 
     @Override
@@ -154,14 +168,16 @@ public class ImageUploadFragment extends Fragment implements
                     System.out.println("image url is : "+uri);
                     System.out.println("create the post object here");
                     post=new Post.Builder()
+                            .setYearId(yearId)
+                            .setMonthId(monthId)
+                            .setPostId(postId)
                             .setImageUrl(uri.toString())
                             .setCaption(caption.getText().toString())
-                            .setMemberId("ACM1001")
+                            .setMemberId(memberId)
                             .build();
-                    Calendar calendar=Calendar.getInstance();
-                    Call<Post> newPostCall= homePageClient.createPost("Y"+calendar.get(Calendar.YEAR),
-                            "M"+calendar.get(Calendar.MONTH),
-                            post.getMemberId()+Calendar.getInstance().getTimeInMillis(),
+                    Call<Post> newPostCall= homePageClient.createPost(post.getYearId(),
+                            post.getMonthid(),
+                            post.getPostId(),
                             post);
 
                     newPostCall.enqueue(ImageUploadFragment.this);
@@ -198,7 +214,27 @@ public class ImageUploadFragment extends Fragment implements
         progressBar.setIndeterminate(true);
     }
 
+    @Override
+    public void onCanceled() {
+        System.out.println("on cancelled called");
+        resultListener.onUpload(this,UPLOAD_CANCELLED);
+    }
+
+
+    @Override
+    public void onResponse(Call<Post> call, Response<Post> response) {
+        System.out.println("Post Metadata saved successfully");
+        resultListener.onUpload(this,ImageUploadFragment.UPLOAD_SUCCESSFUL);
+    }
+
+    @Override
+    public void onFailure(Call<Post> call, Throwable t) {
+        t.printStackTrace();
+        System.out.println("posting of meta data failed");
+        resultListener.onUpload(this,ImageUploadFragment.UPLOAD_FAILED);
+    }
+
     public interface UploadResultListener {
-        public void onUpload(ImageUploadFragment imageUploadFragment,int resultCode);
+        void onUpload(ImageUploadFragment imageUploadFragment,int resultCode);
     }
 }
