@@ -42,6 +42,7 @@ public class EditProfileFragment extends Fragment
     EditText editTextBranch;
     Button buttonSave;
     Button buttonCancel;
+    Button buttonPassChange;
 
     FragmentInteractionListener listener;
 
@@ -82,6 +83,7 @@ public class EditProfileFragment extends Fragment
         editTextBranch = view.findViewById(R.id.edit_text_edit_branch);
         buttonCancel = view.findViewById(R.id.button_edit_cancel);
         buttonSave = view.findViewById(R.id.button_edit_save);
+        buttonPassChange = view.findViewById(R.id.button_edit_passchange);
 
         editTextName.setText(member.getName());
         editTextContact.setText(member.getContact());
@@ -91,6 +93,7 @@ public class EditProfileFragment extends Fragment
 
         buttonCancel.setOnClickListener(this);
         buttonSave.setOnClickListener(this);
+        buttonPassChange.setOnClickListener(this);
         return view;
     }
 
@@ -105,6 +108,11 @@ public class EditProfileFragment extends Fragment
         }
         else if(view.getId() == R.id.button_edit_cancel) {
             listener.onDataEditResult(this,ACTION_CANCELLED_BY_USER,member);
+        }
+        else if(view.getId() == R.id.button_edit_passchange) {
+            PasswordChangeDialogFragment passchangeFrag =
+                    PasswordChangeDialogFragment.newInstance(membershipClient,member);
+            passchangeFrag.show(getChildFragmentManager(),getString(R.string.dialog_fragment_tag_pass_change));
         }
     }
 

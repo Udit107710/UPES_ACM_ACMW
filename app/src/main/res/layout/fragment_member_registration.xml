@@ -14,7 +14,7 @@
         android:id="@+id/scroll_bar_container"
         android:layout_width="0dp"
         android:layout_height="0dp"
-        android:layout_marginTop="60dp"
+        android:layout_marginTop="40dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="1.0"
@@ -27,6 +27,16 @@
             android:layout_height="match_parent"
             android:orientation="vertical">
 
+            <TextView
+                android:id="@+id/textView13"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Required Details"
+                android:textAlignment="center"
+                android:textSize="18sp"
+                android:padding="16dp"
+                android:textStyle="bold" />
+
             <EditText
                 android:id="@+id/editText_sap"
                 android:layout_width="match_parent"
@@ -36,15 +46,15 @@
                 android:hint="SAP ID"
                 android:inputType="number" />
 
-        <EditText
-            android:id="@+id/editText_name"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="8dp"
-            android:hint="Full Name"
-            android:textSize="16sp" />
+            <EditText
+                android:id="@+id/editText_name"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="8dp"
+                android:hint="Full Name"
+                android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/editText_contact"
@@ -91,47 +101,39 @@
 
 
             <EditText
-            android:id="@+id/editText_branch"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_marginLeft="8dp"
-            android:layout_marginRight="8dp"
-            android:layout_marginTop="8dp"
-            android:hint="Branch"
-            android:textSize="16sp" />
-
-
-
-
-
-
-
-
-
-
-
-        <RadioGroup
-            android:id="@+id/radio_group_membership"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:layout_marginBottom="8dp"
-            android:layout_marginTop="8dp"
-            android:orientation="horizontal">
-
-            <RadioButton
-                android:id="@+id/radio_button_premium"
-                android:layout_width="wrap_content"
+                android:id="@+id/editText_branch"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Premium" />
+                android:layout_marginLeft="8dp"
+                android:layout_marginRight="8dp"
+                android:layout_marginTop="8dp"
+                android:hint="Branch"
+                android:textSize="16sp" />
 
-            <RadioButton
-                android:id="@+id/radio_button_normal"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:text="Normal" />
-        </RadioGroup>
+
+            <RadioGroup
+                android:id="@+id/radio_group_membership"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:layout_marginBottom="8dp"
+                android:layout_marginTop="8dp"
+                android:orientation="horizontal">
+
+                <RadioButton
+                    android:id="@+id/radio_button_premium"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Premium" />
+
+                <RadioButton
+                    android:id="@+id/radio_button_normal"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:text="Normal" />
+            </RadioGroup>
+
             <Button
                 android:id="@+id/button_register"
                 android:layout_width="match_parent"
@@ -139,6 +141,7 @@
                 android:layout_marginLeft="8dp"
                 android:layout_marginRight="4dp"
                 android:layout_weight="1"
+                android:background="@color/acm_standard"
                 android:text="Register" />
         </LinearLayout>
     </ScrollView>

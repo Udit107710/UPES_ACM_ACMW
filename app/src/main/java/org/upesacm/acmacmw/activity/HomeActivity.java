@@ -35,6 +35,7 @@ import org.upesacm.acmacmw.fragment.HomePageFragment;
 import org.upesacm.acmacmw.fragment.MemberRegistrationFragment;
 import org.upesacm.acmacmw.fragment.OTPVerificationFragment;
 import org.upesacm.acmacmw.fragment.OngoingProjectFragment;
+import org.upesacm.acmacmw.fragment.PasswordChangeDialogFragment;
 import org.upesacm.acmacmw.fragment.StudyMaterialFragment;
 import org.upesacm.acmacmw.fragment.UserProfileFragment;
 import org.upesacm.acmacmw.fragment.homepage.PostsFragment;
@@ -59,7 +60,8 @@ public class HomeActivity extends AppCompatActivity implements
         ImageUploadFragment.UploadResultListener,
         View.OnClickListener,
         UserProfileFragment.FragmentInteractioListener,
-        EditProfileFragment.FragmentInteractionListener{
+        EditProfileFragment.FragmentInteractionListener,
+        PasswordChangeDialogFragment.PasswordChangeListener{
     private static final String BASE_URL="https://acm-acmw-app-6aa17.firebaseio.com/";
     private static final int ADMIN_CONSOLE_MENU_ID = 1;
 
@@ -170,7 +172,7 @@ public class HomeActivity extends AppCompatActivity implements
     public void onClick(View view) {
         if(view.getId()==R.id.button_sign_in) {
             LoginDialogFragment loginDialogFragment =new LoginDialogFragment();
-            loginDialogFragment.show(fragmentManager,"fragment_login");
+            loginDialogFragment.show(fragmentManager,getString(R.string.dialog_fragment_tag_login));
             drawerLayout.closeDrawer(GravityCompat.START);
         }
         else if(view.getId() == R.id.image_button_profile_pic) {
@@ -593,4 +595,35 @@ public class HomeActivity extends AppCompatActivity implements
         displayHomePage();
     }
     /* &&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&*/
+
+
+    @Override
+    public void onPasswordChange(int resultCode, String newpass) {
+        String msg;
+        if(resultCode==PasswordChangeDialogFragment.PASSWORD_SUCCESSSFULLY_CHANGED) {
+            Member modifiedMember = new Member.Builder()
+                    .setmemberId(signedInMember.getMemberId())
+                    .setContact(signedInMember.getContact())
+                    .setName(signedInMember.getName())
+                    .setBranch(signedInMember.getBranch())
+                    .setYear(signedInMember.getYear())
+                    .setEmail(signedInMember.getEmail())
+                    .setPassword(newpass)
+                    .setSAPId(signedInMember.getSap())
+                    .build();
+            signedInMember = modifiedMember;
+            msg="Password Successfully Changed";
+        }
+        else if(resultCode == PasswordChangeDialogFragment.INCORRECT_OLD_PASSWORD) {
+            msg="Incorrect Old Password";
+        }
+        else if(resultCode == PasswordChangeDialogFragment.ACTION_CANCELLED_BY_USER)
+            msg="cancelled";
+        else if(resultCode == PasswordChangeDialogFragment.PASSWORD_CHANGE_FAILED)
+            msg="Some error occured while changing password";
+        else
+            msg="unexpected resultcode";
+
+        Toast.makeText(this,msg,Toast.LENGTH_LONG).show();
+    }
 }
