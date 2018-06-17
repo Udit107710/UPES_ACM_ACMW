@@ -69,6 +69,8 @@ public class ImageUploadFragment extends Fragment implements
     String yearId;
     String monthId;
     String postId;
+    String day;
+    String time;
     UploadTask uploadTask;
     public ImageUploadFragment() {
         // Required empty public constructor
@@ -131,7 +133,10 @@ public class ImageUploadFragment extends Fragment implements
         Calendar calendar=Calendar.getInstance();
         yearId="Y"+calendar.get(Calendar.YEAR);
         monthId="M"+calendar.get(Calendar.MONTH);
-        postId=memberId+Calendar.getInstance().getTimeInMillis();
+        postId="ACM"+Calendar.getInstance().getTimeInMillis()+memberId.substring(3,memberId.length());
+        day=String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
+        time=String.valueOf(calendar.get(Calendar.HOUR_OF_DAY))+":"+calendar.get(Calendar.MINUTE);
+        System.out.println("postId : "+postId);
 
         storageRef = storageRef.child(memberId+"/"+postId+".png");
         uploadTask =  storageRef.putBytes(byteArray);
@@ -173,10 +178,12 @@ public class ImageUploadFragment extends Fragment implements
                             .setPostId(postId)
                             .setImageUrl(uri.toString())
                             .setCaption(caption.getText().toString())
+                            .setDay(day)
+                            .setTime(time)
                             .setMemberId(memberId)
                             .build();
                     Call<Post> newPostCall= homePageClient.createPost(post.getYearId(),
-                            post.getMonthid(),
+                            post.getMonthId(),
                             post.getPostId(),
                             post);
 
@@ -223,6 +230,7 @@ public class ImageUploadFragment extends Fragment implements
 
     @Override
     public void onResponse(Call<Post> call, Response<Post> response) {
+        System.out.println("post save response : "+response.message());
         System.out.println("Post Metadata saved successfully");
         resultListener.onUpload(this,ImageUploadFragment.UPLOAD_SUCCESSFUL);
     }

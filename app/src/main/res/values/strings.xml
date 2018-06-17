@@ -30,6 +30,7 @@
     <string name="new_member_sap_key">new member sap</string>
     <string name="new_member_key">new member key</string>
     <string name="logged_in_member_key">logged in member key</string>
+    <string name="logged_in_member_details_key">logged in member details</string>
 
     <string name="logout_confirmation">Are you sure you want to log out?</string>
 

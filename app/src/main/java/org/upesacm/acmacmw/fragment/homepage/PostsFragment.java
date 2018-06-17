@@ -15,6 +15,7 @@ import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -34,8 +35,12 @@ import com.google.firebase.database.ValueEventListener;
 
 import org.upesacm.acmacmw.Manifest;
 import org.upesacm.acmacmw.R;
+import org.upesacm.acmacmw.activity.HomeActivity;
 import org.upesacm.acmacmw.adapter.PostsRecyclerViewAdapter;
+import org.upesacm.acmacmw.fragment.ImageUploadFragment;
+import org.upesacm.acmacmw.listener.HomeActivityStateChangeListener;
 import org.upesacm.acmacmw.listener.OnLoadMoreListener;
+import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.Post;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 
@@ -56,7 +61,8 @@ import static android.app.Activity.RESULT_OK;
 public class PostsFragment extends Fragment
         implements OnLoadMoreListener,
         Callback<HashMap<String,Post>>,
-        ValueEventListener {
+        ValueEventListener,
+        HomeActivityStateChangeListener{
 
     static final int CHOOSE_FROM_GALLERY=2;
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -70,7 +76,8 @@ public class PostsFragment extends Fragment
     private int monthCount=-1;
     private DatabaseReference postsReference;
     PostsRecyclerViewAdapter recyclerViewAdapter;
-    HomeFragmentInteractionListener interactionListener;
+
+    Member signedInMember;
 
     public PostsFragment() {
         // Required empty public constructor
@@ -88,22 +95,17 @@ public class PostsFragment extends Fragment
         System.out.println("onCreate home page fragment");
         childFm=getChildFragmentManager();
 
+        Bundle bundle=getArguments();
+        if(bundle!=null) {
+
+        }
+
         Calendar calendar = Calendar.getInstance();
         postsReference= FirebaseDatabase.getInstance()
                 .getReference("posts/"+"Y"+calendar.get(Calendar.YEAR)+"/"
                         +"M"+calendar.get(Calendar.MONTH));
     }
 
-    @Override
-    public void onAttach(Context context) {
-        if(context instanceof HomeFragmentInteractionListener) {
-            interactionListener=(HomeFragmentInteractionListener)context;
-            super.onAttach(context);
-        }
-        else
-            throw new IllegalStateException(context.toString()+" must implement" +
-                    "HomeFragmentInteractionListener");
-    }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -120,7 +122,7 @@ public class PostsFragment extends Fragment
             }
         });
 
-        recyclerViewAdapter=new PostsRecyclerViewAdapter(recyclerView,homePageClient);
+        recyclerViewAdapter=new PostsRecyclerViewAdapter(recyclerView,homePageClient,signedInMember);
         recyclerViewAdapter.setOnLoadMoreListener(this);
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
@@ -131,6 +133,8 @@ public class PostsFragment extends Fragment
         /* **********************************************************************************/
 
         progressBar.setVisibility(View.VISIBLE);
+
+        ((HomeActivity)getActivity()).addOnHomeActivityStateChangeListener(this);
         return view;
     }
 
@@ -174,7 +178,7 @@ public class PostsFragment extends Fragment
             }
             Bundle args=new Bundle();
             args.putByteArray("image_data",byteArray);
-            interactionListener.onNewPostDataAvailable(args);
+            this.onNewPostDataAvailable(args);
 
         } else if (requestCode == CHOOSE_FROM_GALLERY && resultCode == RESULT_OK && resultCode!=RESULT_CANCELED) {
             System.out.println("choose from gallery");
@@ -186,7 +190,7 @@ public class PostsFragment extends Fragment
                 byte[] byteArray = stream.toByteArray();
                 Bundle args=new Bundle();
                 args.putByteArray("image_data",byteArray);
-                interactionListener.onNewPostDataAvailable(args);
+                this.onNewPostDataAvailable(args);
             } catch (IOException e) {
                 e.printStackTrace();
             }
@@ -292,6 +296,17 @@ public class PostsFragment extends Fragment
     }
     /* ######################################################################################### */
 
+    public void onNewPostDataAvailable(Bundle args) {
+        System.out.println("on new post data available called");
+        ((HomeActivity)getContext()).getSupportActionBar().hide();
+        ((HomeActivity)getContext()).setDrawerEnabled(false);
+        ImageUploadFragment imageUploadFragment=ImageUploadFragment.newInstance(homePageClient,signedInMember.getMemberId());
+        imageUploadFragment.setArguments(args);
+
+        FragmentTransaction ft=((HomeActivity)getContext()).getSupportFragmentManager().beginTransaction();
+        ft.replace(R.id.frame_layout,imageUploadFragment,getString(R.string.fragment_tag_image_upload));
+        ft.commit();
+    }
 
 
 
@@ -309,8 +324,18 @@ public class PostsFragment extends Fragment
                 .enqueue(this);
     }
 
-    public interface HomeFragmentInteractionListener{
-        void onNewPostDataAvailable(Bundle args);
+
+    @Override
+    public void onMemberLogin(@NonNull Member signedInMember) {
+        System.out.println("postfragment onMemberLogin : "+signedInMember);
+        this.signedInMember=signedInMember;
+        recyclerViewAdapter.setSignedInMember(signedInMember);
     }
 
+    @Override
+    public void onMemberLogout() {
+        System.out.println("postfragment onMemberLogout : ");
+        this.signedInMember=null;
+        recyclerViewAdapter.setSignedInMember(null);
+    }
 }

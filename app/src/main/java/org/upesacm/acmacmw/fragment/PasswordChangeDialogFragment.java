@@ -104,30 +104,33 @@ public class PasswordChangeDialogFragment extends DialogFragment
                             @Override
                             public void onResponse(Call<Member> call, Response<Member> response) {
                                 System.out.println("password successfully changed");
-                                changeListener.onPasswordChange(PASSWORD_SUCCESSSFULLY_CHANGED,newpass);
+                                changeListener.onPasswordChange(PasswordChangeDialogFragment.this,PASSWORD_SUCCESSSFULLY_CHANGED);
                                 PasswordChangeDialogFragment.this.dismiss();
                             }
 
                             @Override
                             public void onFailure(Call<Member> call, Throwable t) {
                                 System.out.println("Failed to change to password");
-                                changeListener.onPasswordChange(PASSWORD_CHANGE_FAILED,null);
+                                changeListener.onPasswordChange(PasswordChangeDialogFragment.this,PASSWORD_CHANGE_FAILED);
                                 PasswordChangeDialogFragment.this.dismiss();
                             }
                         });
             }
             else {
-                changeListener.onPasswordChange(INCORRECT_OLD_PASSWORD,null);
+                changeListener.onPasswordChange(this,INCORRECT_OLD_PASSWORD);
                 this.dismiss();
             }
         }
         else if(view.getId() == R.id.button_pass_change_cancel) {
-            changeListener.onPasswordChange(ACTION_CANCELLED_BY_USER,null);
+            changeListener.onPasswordChange(this,ACTION_CANCELLED_BY_USER);
             this.dismiss();
         }
     }
+    public String getNewPass() {
+        return newpass;
+    }
 
     public interface PasswordChangeListener {
-        void onPasswordChange(int resultCode,String newpass);
+        void onPasswordChange(PasswordChangeDialogFragment fragment,int resultCode);
     }
 }

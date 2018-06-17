@@ -22,9 +22,21 @@ public class Post implements Parcelable {
     private String caption;
     private String memberId;
     private String yearId;
-    private String monthid;
+    private String monthId;
+    private String day;
+    private String time;
     private ArrayList<String> likesIds;
     private String postId;
+
+    public String getDay() {
+        return day;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+
 
     public String getPostId() {
         return postId;
@@ -34,11 +46,13 @@ public class Post implements Parcelable {
         return yearId;
     }
 
-    public String getMonthid() {
-        return monthid;
+    public String getMonthId() {
+        return monthId;
     }
 
     public ArrayList<String> getLikesIds() {
+        if(likesIds==null)
+            likesIds=new ArrayList<>();
         return likesIds;
     }
 
@@ -77,23 +91,27 @@ public class Post implements Parcelable {
     }
 
     public static class Builder {
-        String imageUrl;
-        String caption;
-        String memberId;
-        String yearId;
-        String monthId;
-        String postId;
-        ArrayList<String> likesIds;
+        private String imageUrl;
+        private String caption;
+        private String memberId;
+        private String yearId;
+        private String monthId;
+        private String day;
+        private String time;
+        private ArrayList<String> likesIds;
+        private String postId;
 
         public Post build() {
             Post post=new Post();
             post.yearId=yearId;
-            post.monthid=monthId;
+            post.monthId=monthId;
             post.imageUrl=imageUrl;
             post.caption=caption;
             post.memberId=memberId;
-            post.likesIds=likesIds;
+            post.likesIds=likesIds==null?new ArrayList():likesIds;
             post.postId=postId;
+            post.day=day;
+            post.time=time;
             return post;
         }
 
@@ -122,13 +140,23 @@ public class Post implements Parcelable {
             return this;
         }
 
-        public Builder setLikesCount(ArrayList<String> count) {
+        public Builder setLikesIds(ArrayList<String> likesIds) {
             this.likesIds=likesIds;
             return this;
         }
 
         public Builder setPostId(String postId) {
             this.postId=postId;
+            return this;
+        }
+
+        public Builder setDay(String day) {
+            this.day=day;
+            return this;
+        }
+
+        public Builder setTime(String time) {
+            this.time=time;
             return this;
         }
     }

@@ -14,10 +14,15 @@ import com.bumptech.glide.Glide;
 
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.listener.OnLoadMoreListener;
+import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.Post;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
 
@@ -26,9 +31,12 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     boolean isLoading=false;
     ArrayList<Post> posts;
     HomePageClient homePageClient;
-    public PostsRecyclerViewAdapter(RecyclerView recyclerView, HomePageClient homePageClient) {
+    Member signedInMember;
+    public PostsRecyclerViewAdapter(RecyclerView recyclerView, HomePageClient homePageClient,
+                                    Member signedInMember) {
         this.recyclerView=recyclerView;
         this.homePageClient = homePageClient;
+        this.signedInMember = signedInMember;
         addOnScrollListener();
     }
     @Override
@@ -40,7 +48,8 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
         //     Eg ; match_constraint is equivalent to 0dp in constaint layout
         //      But if root is not specified then, the inflator will inflate the child with 0dp such that its dimension(whichever
         //      we have set as match_constraint) is 0dp.
-        View viewitem = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
+        View viewitem = LayoutInflater.from(parent.getContext()).inflate(viewType, parent,
+                false);
         if(viewType==R.layout.post_layout)
             return new PostViewHolder(viewitem);
         else
@@ -72,12 +81,16 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
         return R.layout.post_layout;
     }
 
-    public class PostViewHolder extends RecyclerView.ViewHolder {
+    public class PostViewHolder extends RecyclerView.ViewHolder
+            implements View.OnClickListener {
         private TextView username;
         private TextView textViewCaption;
         private ImageView imageView;
         private ImageButton imageButtonLike;
+        private ImageButton imageButtonDelete;
         private TextView textViewLikeCount;
+        private TextView textViewDate;
+        private TextView textViewTime;
         private Post post;
         public PostViewHolder(View itemView) {
             super(itemView);
@@ -85,7 +98,10 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
             textViewCaption = itemView.findViewById(R.id.text_view_post_caption);
             imageView=itemView.findViewById(R.id.image_view_post);
             imageButtonLike = itemView.findViewById(R.id.image_button_post_like);
+            imageButtonDelete = itemView.findViewById(R.id.image_button_post_delete);
             textViewLikeCount = itemView.findViewById(R.id.text_view_post_likecount);
+            textViewDate = itemView.findViewById(R.id.text_view_post_date);
+            textViewTime = itemView.findViewById(R.id.text_view_post_time);
         }
 
         //This function has been defined to seperate the code of binding the data with the views
@@ -98,22 +114,83 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
             Glide.with(recyclerView)
                     .load(post.getImageUrl())
                     .into(imageView);
-            textViewLikeCount.setText("in progress");
+            textViewLikeCount.setText(String.valueOf(post.getLikesIds().size()));
+            /* ************ Setting up the date and time **************************** */
+            String date=post.getDay()+"/"+post.getMonthId().substring(1)+"/"+post.getYearId().substring(1);
+            textViewDate.setText(date);
+
+            textViewTime.setText(post.getTime());
+            /* ********************************************************************/
+            imageButtonLike.setOnClickListener(this);
+
+            if(signedInMember!=null && post.getMemberId().equals(signedInMember.getMemberId()))
+                imageButtonDelete.setVisibility(View.VISIBLE);
+            else
+                imageButtonDelete.setVisibility(View.GONE);
+            imageButtonDelete.setOnClickListener(this);
+
+
         }
 
-//        @Override
-//        public void onClick(View view) {
-//            Post modifiedPost=new Post.Builder()
-//                    .setMemberId(post.getMemberId())
-//                    .setCaption(post.getCaption())
-//                    .setPostId(post.getPostId())
-//                    .setImageUrl(post.getImageUrl())
-//                    .setLikesCount(post.getLikesCount()+1)
-//                    .setMonthId(post.getMonthid())
-//                    .setYearId(post.getPostId())
-//                    .build();
-//            homePageClient.createPost(modifiedPost.
-//        }
+        @Override
+        public void onClick(View view) {
+            System.out.println("Liked button pressed");
+            if (view.getId() == R.id.image_button_post_like) {
+                if(signedInMember != null) {
+                    System.out.println("like button signedInMember is not null");
+                    boolean previouslyLiked = false;
+                    int pos = 0;
+                    for (String memberId : post.getLikesIds()) {
+                        System.out.println("member id : " + memberId);
+                        if (memberId.equals(signedInMember.getMemberId())) {
+                            previouslyLiked = true;
+                            break;
+                        }
+                        pos++;
+                    }
+                    if (previouslyLiked)
+                        post.getLikesIds().remove(pos);
+                    else
+                        post.getLikesIds().add(signedInMember.getMemberId());
+
+                    homePageClient.createPost(post.getYearId(), post.getMonthId(), post.getPostId(), post)
+                            .enqueue(new Callback<Post>() {
+                                @Override
+                                public void onResponse(Call<Post> call, Response<Post> response) {
+                                    System.out.println("likes count successfully updated");
+                                    //textViewLikeCount.setText(String.valueOf(post.getLikesIds().size()));
+                                }
+
+                                @Override
+                                public void onFailure(Call<Post> call, Throwable t) {
+                                    System.out.println("failed to update the like count");
+                                }
+                            });
+                }
+                else {
+                    System.out.println("like button User not signed in");
+                }
+
+            }
+            else if(view.getId() == R.id.image_button_post_delete){
+                System.out.println("deleting post");
+                Post nullPost=new Post();
+                homePageClient.createPost(post.getYearId(),post.getMonthId(),post.getPostId(),nullPost)
+                        .enqueue(new Callback<Post>() {
+                            @Override
+                            public void onResponse(Call<Post> call, Response<Post> response) {
+                                System.out.println("post deleted : "+response.message());
+                            }
+
+                            @Override
+                            public void onFailure(Call<Post> call, Throwable t) {
+                                t.printStackTrace();
+                                System.out.println("failed to delete post");
+                            }
+                        });
+            }
+        }
+
     }
 
     public class LoadingViewHolder extends RecyclerView.ViewHolder {
@@ -136,6 +213,11 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     public void setPosts(ArrayList<Post> posts) {
         System.out.println("set Posts called : "+posts.size());
         this.posts=posts;
+        notifyDataSetChanged();
+    }
+
+    public void setSignedInMember(Member signedInMember) {
+        this.signedInMember = signedInMember;
         notifyDataSetChanged();
     }
 

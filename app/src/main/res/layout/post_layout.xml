@@ -17,6 +17,32 @@
         android:layout_height="match_parent">
 
         <TextView
+            android:id="@+id/text_view_post_date"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginTop="4dp"
+            android:text="text_view_post_date"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toTopOf="@+id/image_view_post"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/text_view_post_time"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="4dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="4dp"
+            android:text="TextView"
+            android:textSize="12sp"
+            app:layout_constraintBottom_toTopOf="@+id/image_view_post"
+            app:layout_constraintEnd_toStartOf="@+id/text_view_post_date"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
             android:id="@+id/text_view_post_username"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -31,6 +57,8 @@
             app:layout_constraintBottom_toTopOf="@+id/image_view_post"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent" />
+
+
 
         <ImageView
             android:id="@+id/image_view_post"
@@ -84,6 +112,14 @@
                 android:paddingLeft="16dp"
                 android:paddingRight="16dp"
                 android:src="@drawable/like" />
+
+            <ImageButton
+                android:id="@+id/image_button_post_delete"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="0"
+                android:visibility="gone"
+                card_view:srcCompat="@android:drawable/ic_menu_delete" />
 
 
         </LinearLayout>

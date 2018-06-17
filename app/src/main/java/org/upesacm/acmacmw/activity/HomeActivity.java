@@ -39,11 +39,14 @@ import org.upesacm.acmacmw.fragment.PasswordChangeDialogFragment;
 import org.upesacm.acmacmw.fragment.StudyMaterialFragment;
 import org.upesacm.acmacmw.fragment.UserProfileFragment;
 import org.upesacm.acmacmw.fragment.homepage.PostsFragment;
+import org.upesacm.acmacmw.listener.HomeActivityStateChangeListener;
 import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.NewMember;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 import org.upesacm.acmacmw.retrofit.MembershipClient;
 import org.upesacm.acmacmw.util.MemberIDGenerator;
+
+import java.util.ArrayList;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -56,7 +59,6 @@ public class HomeActivity extends AppCompatActivity implements
         LoginDialogFragment.InteractionListener,
         MemberRegistrationFragment.RegistrationResultListener,
         OTPVerificationFragment.OTPVerificationResultListener,
-        PostsFragment.HomeFragmentInteractionListener,
         ImageUploadFragment.UploadResultListener,
         View.OnClickListener,
         UserProfileFragment.FragmentInteractioListener,
@@ -65,19 +67,22 @@ public class HomeActivity extends AppCompatActivity implements
     private static final String BASE_URL="https://acm-acmw-app-6aa17.firebaseio.com/";
     private static final int ADMIN_CONSOLE_MENU_ID = 1;
 
-    Toolbar toolbar;
-    DrawerLayout drawerLayout;
-    ActionBarDrawerToggle toggle;
-    FragmentManager fragmentManager;
-    NavigationView navigationView;
-    Retrofit retrofit;
-    HomePageClient homePageClient;
-    MembershipClient membershipClient;
-    Member signedInMember;
-    View headerLayout;
-    String newMemberSap;
+    private Toolbar toolbar;
+    private DrawerLayout drawerLayout;
+    private ActionBarDrawerToggle toggle;
+    private FragmentManager fragmentManager;
+    private NavigationView navigationView;
+    private Retrofit retrofit;
+    private HomePageClient homePageClient;
+    private MembershipClient membershipClient;
+    private Member signedInMember;
+    private View headerLayout;
+    private String newMemberSap;
 
-    HomePageFragment homePageFragment;
+    private HomePageFragment homePageFragment;
+    private HomeActivityStateChangeListener defaultStateChangeListener;
+    private ArrayList<HomeActivityStateChangeListener> stateChangeListeners=new ArrayList<>();
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -85,24 +90,25 @@ public class HomeActivity extends AppCompatActivity implements
         toolbar = findViewById(R.id.my_toolbar);
         drawerLayout=findViewById(R.id.drawer_layout);
         fragmentManager=getSupportFragmentManager();
-
         retrofit=new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(JacksonConverterFactory.create())
                 .build();
         homePageClient =retrofit.create(HomePageClient.class);
         membershipClient=retrofit.create(MembershipClient.class);
-
-
-        /* *****************Setting up home page fragment ***********************/
-        FragmentTransaction fragmentTransaction=fragmentManager.beginTransaction();
-        homePageFragment = HomePageFragment.newInstance(homePageClient,
-                this);
-        fragmentTransaction.replace(R.id.frame_layout,homePageFragment,"homepage");
-        fragmentTransaction.commit();
-        /* *********************************************************************************/
-
         navigationView=findViewById(R.id.nav_view);
+        defaultStateChangeListener = new HomeActivityStateChangeListener() {
+            @Override
+            public void onMemberLogin(Member member) {
+                System.out.println("Default onMemberLogin");
+            }
+
+            @Override
+            public void onMemberLogout() {
+                System.out.println("Default onMemberLogout");
+            }
+        };
+        stateChangeListeners.add(defaultStateChangeListener);
 
         /* *************************Setting the the action bar *****************************/
         setSupportActionBar(toolbar);
@@ -112,32 +118,31 @@ public class HomeActivity extends AppCompatActivity implements
         toggle.syncState();
         /* **********************************************************************************/
 
-
+        /* *****************Setting up home page fragment ***********************/
+        FragmentTransaction fragmentTransaction=fragmentManager.beginTransaction();
+        homePageFragment = HomePageFragment.newInstance(homePageClient,
+                this);
+        fragmentTransaction.replace(R.id.frame_layout,homePageFragment,"homepage");
+        fragmentTransaction.commit();
+        /* *********************************************************************************/
+//statechange listener is not added when the setMemberProfile is called for the first time
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.action_home);
         headerLayout=navigationView.getHeaderView(0);
         Button signin=headerLayout.findViewById(R.id.button_sign_in);
         signin.setOnClickListener(this);
 
-        SharedPreferences preferences=getPreferences(Context.MODE_PRIVATE);
-        String signedInMemberSap=preferences.getString(getString(R.string.logged_in_member_key),null);
-        if(signedInMemberSap!=null) {
-            membershipClient.getMember(signedInMemberSap)
-                    .enqueue(new Callback<Member>() {
-                        @Override
-                        public void onResponse(Call<Member> call, Response<Member> response) {
-                            signedInMember=response.body();
-                            if(signedInMember!=null) {
-                                setUpMemberProfile(signedInMember);
-                            }
-                        }
 
-                        @Override
-                        public void onFailure(Call<Member> call, Throwable t) {
-                            System.out.println("failed to fetch signed in member details");
-                        }
-                    });
+        Bundle bundle = getIntent().getExtras();
+        if(bundle!=null) {
+            signedInMember = (Member)bundle.get(getString(R.string.logged_in_member_details_key));
+            setUpMemberProfile(signedInMember);
         }
+        System.out.println("signedInMember : "+signedInMember);
+
+
+
+
     }
 
     @Override
@@ -215,16 +220,21 @@ public class HomeActivity extends AppCompatActivity implements
         ft.commit();
     }
 
-    void setUpMemberProfile(Member member){
+    void setUpMemberProfile(@NonNull Member member){
         System.out.println("setting up member profile");
         /* ************************** Saving sign in info in locallly *********************  */
-        SharedPreferences.Editor editor=getPreferences(Context.MODE_PRIVATE).edit();
+        SharedPreferences.Editor editor=getSharedPreferences(getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE).edit();
         editor.putString(getString(R.string.logged_in_member_key),member.getSap());
         editor.commit();
         /* ************************************************************************************/
         this.signedInMember=member;
-
         customizeNavigationDrawer(true);
+
+        for(HomeActivityStateChangeListener listener:stateChangeListeners) {
+            System.out.println("calling statechange listener callbacks");
+            listener.onMemberLogin(signedInMember);
+        }
     }
 
     @Override
@@ -320,6 +330,14 @@ public class HomeActivity extends AppCompatActivity implements
         navigationView.invalidate();
     }
 
+    public void addOnHomeActivityStateChangeListener(HomeActivityStateChangeListener listener) {
+        System.out.println("addOnHomeActivityStateChangeListener");
+        stateChangeListeners.add(listener);
+        //call the listener once after intially adding it
+        if(signedInMember!=null)
+            listener.onMemberLogin(signedInMember);
+    }
+
 
 
     /* $$$$$$$$$$$$$$$$$$$$$$$$ Callbacks of LoginDialogFragment $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ */
@@ -366,7 +384,8 @@ public class HomeActivity extends AppCompatActivity implements
         loginDialogFragment.dismiss();
 
         /* **************** obtaining stored sap(if any)************************************* */
-        SharedPreferences preferences=getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences preferences=getSharedPreferences(getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE);
         newMemberSap=preferences.getString(getString(R.string.new_member_sap_key),null);
         /* **************************************************************************************/
         System.out.println("stored sap id : "+newMemberSap);
@@ -448,7 +467,8 @@ public class HomeActivity extends AppCompatActivity implements
             public void onResponse(Call<Member> call, Response<Member> response) {
                 System.out.println("new acm acm w member added");
                 /* ********************Adding log in info locally ************************/
-                SharedPreferences.Editor editor=getPreferences(Context.MODE_PRIVATE).edit();
+                SharedPreferences.Editor editor=getSharedPreferences(getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE).edit();
                 editor.putString(getString(R.string.logged_in_member_key),member.getSap());
                 editor.commit();
                 /* ************************************************************************* */
@@ -471,24 +491,6 @@ public class HomeActivity extends AppCompatActivity implements
         displayHomePage();
     }
     /* ###########################################################################################*/
-
-
-
-
-    /* @@@@@@@@@@@@@@@@@@@@@@@@Callback from PostFragment @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
-    @Override
-    public void onNewPostDataAvailable(Bundle args) {
-        System.out.println("on new post data available called");
-        getSupportActionBar().hide();
-        setDrawerEnabled(false);
-        ImageUploadFragment imageUploadFragment=ImageUploadFragment.newInstance(homePageClient,signedInMember.getMemberId());
-        imageUploadFragment.setArguments(args);
-
-        FragmentTransaction ft=fragmentManager.beginTransaction();
-        ft.replace(R.id.frame_layout,imageUploadFragment,getString(R.string.fragment_tag_image_upload));
-        ft.commit();
-    }
-    /*@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@*/
 
 
 
@@ -529,14 +531,18 @@ public class HomeActivity extends AppCompatActivity implements
                     public void onClick(DialogInterface dialogInterface, int i) {
                         /* ******************* Clear the member data from the app ***********************/
                         signedInMember=null;
-                        SharedPreferences.Editor editor=getPreferences(Context.MODE_PRIVATE).edit();
+                        SharedPreferences.Editor editor=getSharedPreferences(getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE).edit();
                         editor.clear();
                         editor.commit();
                         /* **************************************************************************/
 
                         customizeNavigationDrawer(false);
                         displayHomePage();
-
+                        for(HomeActivityStateChangeListener listener:stateChangeListeners) {
+                            System.out.println("calling statechange listener callbacks logout");
+                            listener.onMemberLogout();
+                        }
                         Toast.makeText(HomeActivity.this,"Successfully Logged Out",
                                 Toast.LENGTH_SHORT).show();
                     }
@@ -598,7 +604,7 @@ public class HomeActivity extends AppCompatActivity implements
 
 
     @Override
-    public void onPasswordChange(int resultCode, String newpass) {
+    public void onPasswordChange(PasswordChangeDialogFragment fragment,int resultCode) {
         String msg;
         if(resultCode==PasswordChangeDialogFragment.PASSWORD_SUCCESSSFULLY_CHANGED) {
             Member modifiedMember = new Member.Builder()
@@ -608,7 +614,7 @@ public class HomeActivity extends AppCompatActivity implements
                     .setBranch(signedInMember.getBranch())
                     .setYear(signedInMember.getYear())
                     .setEmail(signedInMember.getEmail())
-                    .setPassword(newpass)
+                    .setPassword(fragment.getNewPass())
                     .setSAPId(signedInMember.getSap())
                     .build();
             signedInMember = modifiedMember;
@@ -626,4 +632,6 @@ public class HomeActivity extends AppCompatActivity implements
 
         Toast.makeText(this,msg,Toast.LENGTH_LONG).show();
     }
+
+
 }

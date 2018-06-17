@@ -43,7 +43,7 @@ public class EditProfileFragment extends Fragment
     Button buttonSave;
     Button buttonCancel;
     Button buttonPassChange;
-
+    PasswordChangeDialogFragment passchangeFrag;
     FragmentInteractionListener listener;
 
     public EditProfileFragment() {
@@ -110,8 +110,7 @@ public class EditProfileFragment extends Fragment
             listener.onDataEditResult(this,ACTION_CANCELLED_BY_USER,member);
         }
         else if(view.getId() == R.id.button_edit_passchange) {
-            PasswordChangeDialogFragment passchangeFrag =
-                    PasswordChangeDialogFragment.newInstance(membershipClient,member);
+            passchangeFrag = PasswordChangeDialogFragment.newInstance(membershipClient,member);
             passchangeFrag.show(getChildFragmentManager(),getString(R.string.dialog_fragment_tag_pass_change));
         }
     }
@@ -157,7 +156,8 @@ public class EditProfileFragment extends Fragment
                                 .setContact(contact)
                                 .setYear(year)
                                 .setBranch(branch)
-                                .setPassword(member.getPassword())
+                                .setPassword((passchangeFrag==null)?member.getPassword():
+                                        passchangeFrag.getNewPass())
                                 .build();
                                 return modifiedMember;
                     } else
