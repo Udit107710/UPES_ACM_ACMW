@@ -2,6 +2,7 @@ package org.upesacm.acmacmw.fragment.homepage;
 
 import android.app.AlertDialog;
 
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -9,6 +10,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.design.widget.FloatingActionButton;
@@ -17,6 +19,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.FileProvider;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
@@ -45,9 +48,12 @@ import org.upesacm.acmacmw.model.Post;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.HashMap;
 
 import retrofit2.Call;
@@ -67,7 +73,7 @@ public class PostsFragment extends Fragment
     static final int CHOOSE_FROM_GALLERY=2;
     static final int REQUEST_IMAGE_CAPTURE = 1;
 
-    static final int CAMERA_PERMISSION_REQUEST_CODE = 3;
+    static final int CAMERA_AND_STORAGE_PERMISSION_REQUEST_CODE = 3;
 
     FragmentManager childFm;
     HomePageClient homePageClient;
@@ -76,8 +82,11 @@ public class PostsFragment extends Fragment
     private int monthCount=-1;
     private DatabaseReference postsReference;
     PostsRecyclerViewAdapter recyclerViewAdapter;
+    FloatingActionButton floatingActionButton;
 
     Member signedInMember;
+
+    private Uri imageUri;
 
     public PostsFragment() {
         // Required empty public constructor
@@ -114,11 +123,16 @@ public class PostsFragment extends Fragment
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         recyclerView=view.findViewById(R.id.posts_recyclerView);
         progressBar = view.findViewById(R.id.progress_bar_home);
-        FloatingActionButton floatingActionButton = view.findViewById(R.id.cameraButton);
+        floatingActionButton = view.findViewById(R.id.cameraButton);
         floatingActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                onCameraButtonClick(view);
+                if(signedInMember!=null) {
+                    onCameraButtonClick(view);
+                }
+                else {
+                    //opne the google sign in activity here
+                }
             }
         });
 
@@ -145,8 +159,29 @@ public class PostsFragment extends Fragment
     private void dispatchTakePictureIntent() {
             Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
             if (takePictureIntent.resolveActivity(getActivity().getPackageManager()) != null) {
-                startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+//                File imageFile = null;
+//                try {
+//                    imageFile = createImageFile();
+//                }catch(IOException ioe) {
+//                    ioe.printStackTrace();
+//                }
+//                if(imageFile !=null) {
+//                    imageUri = FileProvider.getUriForFile(getContext(),
+//                            "org.upesacm.acmacmw.fileprovider",imageFile);
+//                    System.out.println("imageUri : "+imageUri);
+//                    takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT,imageUri);
+                    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
+               // }
             }
+    }
+
+    private File createImageFile() throws IOException {
+        String timeStamp = new SimpleDateFormat("yyyyMMdd_HHmmss").format(new Date());
+        String filename = "jpeg_"+timeStamp+"_"+".jpg";
+        File storageDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_PICTURES);
+        storageDir.mkdirs();
+        File image = new File(storageDir,filename);
+        return image;
     }
 
     public void onRequestPermissionsResult(int requestCode,String[] permissions,int[] grantResults) {
@@ -155,7 +190,7 @@ public class PostsFragment extends Fragment
                 dispatchTakePictureIntent();
             }
             else {
-                Toast.makeText(getContext(),"Please grant camera permission",Toast.LENGTH_LONG).show();
+                Toast.makeText(getContext(),"Please grant camera and storage permission",Toast.LENGTH_LONG).show();
                 Log.i("MainActivity", "onRequestPermissionsResult Permission denied\n");
             }
         }
@@ -167,6 +202,20 @@ public class PostsFragment extends Fragment
         Bitmap imageBitmap = null;
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             System.out.println("request image capture");
+
+//            getActivity().getContentResolver().notifyChange(imageUri, null);
+//            ContentResolver cr = getActivity().getContentResolver();
+//            Bitmap bitmap;
+//            try
+//            {
+//                bitmap = android.provider.MediaStore.Images.Media.getBitmap(cr, imageUri);
+//                System.out.println("bitmap : "+bitmap);
+//            }
+//            catch (Exception e)
+//            {
+//                Toast.makeText(getContext(), "Failed to load", Toast.LENGTH_SHORT).show();
+//                Log.d("tag", "Failed to load", e);
+//            }
             Bundle extras = data.getExtras();
             imageBitmap = (Bitmap) extras.get("data");
             ByteArrayOutputStream stream = new ByteArrayOutputStream();
@@ -205,13 +254,15 @@ public class PostsFragment extends Fragment
             @Override
             public void onClick(DialogInterface dialog, int item) {
                 if (options[item].equals("Take Photo")) {
-                    if(ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.CAMERA)== PackageManager.PERMISSION_GRANTED) {
+                    if(ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.CAMERA)== PackageManager.PERMISSION_GRANTED 
+                            &&ContextCompat.checkSelfPermission(getContext(), android.Manifest.permission.WRITE_EXTERNAL_STORAGE)== PackageManager.PERMISSION_GRANTED) {
                         dispatchTakePictureIntent();
                     }
                     else {
-                        System.out.println("Permission for camera not granted. Requesting Permission");
+                        System.out.println("Permission for camera or storage not granted. Requesting Permission");
                         ActivityCompat.requestPermissions(getActivity()
-                                ,new String[]{android.Manifest.permission.CAMERA},PostsFragment.CAMERA_PERMISSION_REQUEST_CODE);
+                                ,new String[]{android.Manifest.permission.CAMERA, android.Manifest.permission.WRITE_EXTERNAL_STORAGE},
+                                PostsFragment.CAMERA_AND_STORAGE_PERMISSION_REQUEST_CODE);
                     }
 
                 } else if (options[item].equals("Choose from Gallery")) {

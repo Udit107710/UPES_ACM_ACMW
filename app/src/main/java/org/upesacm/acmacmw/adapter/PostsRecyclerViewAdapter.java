@@ -152,13 +152,13 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
                         post.getLikesIds().remove(pos);
                     else
                         post.getLikesIds().add(signedInMember.getMemberId());
-
+                    textViewLikeCount.setText(String.valueOf(post.getLikesIds().size()));
                     homePageClient.createPost(post.getYearId(), post.getMonthId(), post.getPostId(), post)
                             .enqueue(new Callback<Post>() {
                                 @Override
                                 public void onResponse(Call<Post> call, Response<Post> response) {
                                     System.out.println("likes count successfully updated");
-                                    //textViewLikeCount.setText(String.valueOf(post.getLikesIds().size()));
+                                    textViewLikeCount.setText(String.valueOf(post.getLikesIds().size()));
                                 }
 
                                 @Override

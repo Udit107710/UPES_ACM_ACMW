@@ -135,7 +135,13 @@ public class ImageUploadFragment extends Fragment implements
         monthId="M"+calendar.get(Calendar.MONTH);
         postId="ACM"+Calendar.getInstance().getTimeInMillis()+memberId.substring(3,memberId.length());
         day=String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
-        time=String.valueOf(calendar.get(Calendar.HOUR_OF_DAY))+":"+calendar.get(Calendar.MINUTE);
+
+        String hour=String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
+        hour=(hour.length()==1)?("0"+hour):hour;
+        String minute=String.valueOf(calendar.get(Calendar.MINUTE));
+        minute = (minute.length()==1)?("0"+minute):minute;
+        time=hour+":"+minute;
+
         System.out.println("postId : "+postId);
 
         storageRef = storageRef.child(memberId+"/"+postId+".png");
