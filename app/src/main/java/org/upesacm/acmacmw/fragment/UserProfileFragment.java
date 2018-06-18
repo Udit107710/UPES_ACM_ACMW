@@ -78,6 +78,7 @@ public class UserProfileFragment extends Fragment implements
         textViewContact.setText(member.getContact());
 
 
+        fabEdit.setOnClickListener(this);
         fabLogout.setOnClickListener(this);
         return view;
     }
@@ -87,11 +88,16 @@ public class UserProfileFragment extends Fragment implements
         if(view.getId() == R.id.fab_profile_logout) {
             listener.onSignOutClicked(this);
         }
+        else if(view.getId() == R.id.fab_profile_edit) {
+            listener.onEditClicked(this);
+        }
     }
 
     public interface FragmentInteractioListener {
         void onSignOutClicked(UserProfileFragment fragment);
         void onEditClicked(UserProfileFragment fragment);
     }
+
+
 
 }

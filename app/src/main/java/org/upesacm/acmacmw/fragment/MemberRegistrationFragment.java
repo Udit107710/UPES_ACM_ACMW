@@ -175,7 +175,7 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
         String year=editTextYear.getText().toString().trim();
         boolean premium=(radioGroupMembership.getCheckedRadioButtonId()==R.id.radio_button_premium);
 
-        boolean isSapValid= Pattern.compile("[\\d]{9}").matcher(sap).matches();
+        boolean isSapValid= Pattern.compile("5000[\\d]{5}").matcher(sap).matches();
         boolean isNameValid=Pattern.compile("[a-zA-Z\\s]+").matcher(name).matches();
         boolean isEmailValid=Pattern.compile("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,6}$")
                 .matcher(email).matches();
@@ -237,6 +237,7 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
         editTextName.setText("");
         editTextSap.setText("");
         editTextBranch.setText("");
+        editTextContact.setText("");
         editTextWhatsappNo.setText("");
         editTextYear.setText("");
         editTextBranch.setText("");

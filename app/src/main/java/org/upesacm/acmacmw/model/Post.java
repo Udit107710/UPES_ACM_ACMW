@@ -3,74 +3,94 @@ package org.upesacm.acmacmw.model;
 import android.os.Parcel;
 import android.os.Parcelable;
 
-public class Post implements Parcelable {
-    public static final Parcelable.Creator CREATOR = new Parcelable.Creator(){
+import java.util.ArrayList;
 
-        @Override
-        public Object createFromParcel(Parcel parcel) {
-            return new Post(parcel);
-        }
-        @Override
-        public Object[] newArray(int i) {
-            return new Post[i];
-        }
-    };
+public class Post  {
 
     private String imageUrl;
     private String caption;
-    private String memberId;
+    private String ownerSapId;
+    private String yearId;
+    private String monthId;
+    private String day;
+    private String time;
+    private ArrayList<String> likesIds;
+    private String postId;
+    private String ownerName;
+    
+    public String getOwnerName() {
+        return ownerName;
+    }
+    
+    public String getDay() {
+        return day;
+    }
+
+    public String getTime() {
+        return time;
+    }
+
+
+
+    public String getPostId() {
+        return postId;
+    }
+
+    public String getYearId() {
+        return yearId;
+    }
+
+    public String getMonthId() {
+        return monthId;
+    }
+
+    public ArrayList<String> getLikesIds() {
+        if(likesIds==null)
+            likesIds=new ArrayList<>();
+        return likesIds;
+    }
 
     public String getCaption() {
         return caption;
     }
 
-    public String getMemberId() {
-        return memberId;
+    public String getOwnerSapId() {
+        return ownerSapId;
     }
 
     public String getImageUrl() {
         return imageUrl;
     }
 
-    public void setCaption(String caption) {
-        this.caption = caption;
-    }
-
 
     public Post() {}
+    
 
-    public Post(Parcel parcel) {
-        imageUrl=parcel.readString();
-        caption=parcel.readString();
-        memberId=parcel.readString();
-    }
-
-    public void setImageUrl(String imageUrl) {
-        this.imageUrl=imageUrl;
-    }
-
-    @Override
-    public int describeContents() {
-        return 0;
-    }
-
-    @Override
-    public void writeToParcel(Parcel parcel, int i) {
-        parcel.writeString(imageUrl);
-        parcel.writeString(caption);
-        parcel.writeString(memberId);
-    }
 
     public static class Builder {
-        String imageUrl;
-        String caption;
-        String memberId;
+        private String imageUrl;
+        private String caption;
+        private String ownerSapId;
+        private String yearId;
+        private String monthId;
+        private String day;
+        private String time;
+        private ArrayList<String> likesIds;
+        private String postId;
+        private String ownerName;
+
         public Post build() {
             Post post=new Post();
+            post.yearId=yearId;
+            post.monthId=monthId;
             post.imageUrl=imageUrl;
             post.caption=caption;
-            post.memberId=memberId;
-
+            post.ownerSapId=ownerSapId;
+            post.likesIds=likesIds==null?new ArrayList():likesIds;
+            post.postId=postId;
+            post.day=day;
+            post.time=time;
+            post.ownerName=ownerName;
             return post;
         }
 
@@ -84,9 +104,59 @@ public class Post implements Parcelable {
             return this;
         }
 
-        public Builder setMemberId(String memberId) {
-            this.memberId=memberId;
+        public Builder setOwnerSapId(String ownerSapId) {
+            this.ownerSapId=ownerSapId;
             return this;
         }
+
+        public Builder setYearId(String yearId) {
+            this.yearId=yearId;
+            return this;
+        }
+
+        public Builder setMonthId(String monthId) {
+            this.monthId=monthId;
+            return this;
+        }
+
+        public Builder setLikesIds(ArrayList<String> likesIds) {
+            this.likesIds=likesIds;
+            return this;
+        }
+
+        public Builder setPostId(String postId) {
+            this.postId=postId;
+            return this;
+        }
+
+        public Builder setDay(String day) {
+            this.day=day;
+            return this;
+        }
+
+        public Builder setTime(String time) {
+            this.time=time;
+            return this;
+        }
+        
+        public Builder setOwnerName(String ownerName) {
+            this.ownerName=ownerName;
+            return this;
+        }
+    }
+
+    public boolean syncOwnerData(Member owner) {
+        if(owner.getSap().equals(this.getOwnerSapId())) {
+            this.ownerName = owner.getName();
+            return true;
+        }
+        return false;
+    }
+
+    public boolean syncOwnerData(TrialMember owner) {
+        if(owner.getSap().equals(this.getOwnerSapId())) {
+            this.ownerName = owner.getName();
+        }
+        return false;
     }
 }

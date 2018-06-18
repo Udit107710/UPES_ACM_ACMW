@@ -1,21 +1,36 @@
 package org.upesacm.acmacmw.adapter;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.listener.OnLoadMoreListener;
+import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.Post;
+import org.upesacm.acmacmw.model.TrialMember;
+import org.upesacm.acmacmw.retrofit.HomePageClient;
 
 import java.util.ArrayList;
+
+import retrofit2.Call;
+import retrofit2.Callback;
+import retrofit2.Response;
 
 public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
 
@@ -23,13 +38,20 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     private RecyclerView recyclerView;
     boolean isLoading=false;
     ArrayList<Post> posts;
-    private String date;
-    public PostsRecyclerViewAdapter(RecyclerView recyclerView) {
+    HomePageClient homePageClient;
+    Member signedInMember;
+    TrialMember trialMember;
+    FirebaseDatabase database;
+    public PostsRecyclerViewAdapter(RecyclerView recyclerView, HomePageClient homePageClient,
+                                    FirebaseDatabase database) {
         this.recyclerView=recyclerView;
+        this.homePageClient = homePageClient;
+        this.signedInMember = signedInMember;
+        this.trialMember = trialMember;
+        this.database=database;
         addOnScrollListener();
     }
     @Override
-
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         System.out.println("onCreateViewHolder : "+viewType);
         //NOTE : Apprently when inflating views inside constraint layout it is important to specify the root(constraint layout)
@@ -37,7 +59,8 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
         //     Eg ; match_constraint is equivalent to 0dp in constaint layout
         //      But if root is not specified then, the inflator will inflate the child with 0dp such that its dimension(whichever
         //      we have set as match_constraint) is 0dp.
-        View viewitem = LayoutInflater.from(parent.getContext()).inflate(viewType, parent, false);
+        View viewitem = LayoutInflater.from(parent.getContext()).inflate(viewType, parent,
+                false);
         if(viewType==R.layout.post_layout)
             return new PostViewHolder(viewitem);
         else
@@ -69,23 +92,107 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
         return R.layout.post_layout;
     }
 
-    public class PostViewHolder extends RecyclerView.ViewHolder {
+    public class PostViewHolder extends RecyclerView.ViewHolder
+            implements
+            View.OnClickListener {
         private TextView username;
+        private TextView textViewCaption;
         private ImageView imageView;
+        private ImageButton imageButtonLike;
+        private ImageButton imageButtonDelete;
+        private TextView textViewLikeCount;
+        private TextView textViewDate;
+        private TextView textViewTime;
+        private Post post;
+        private DatabaseReference ownerReference;
+        private DatabaseReference postReference;
         public PostViewHolder(View itemView) {
             super(itemView);
-            username=itemView.findViewById(R.id.editText_username);
+            username=itemView.findViewById(R.id.text_view_post_username);
+            textViewCaption = itemView.findViewById(R.id.text_view_post_caption);
             imageView=itemView.findViewById(R.id.image_view_post);
+            imageButtonLike = itemView.findViewById(R.id.image_button_post_like);
+            imageButtonDelete = itemView.findViewById(R.id.image_button_post_delete);
+            textViewLikeCount = itemView.findViewById(R.id.text_view_post_likecount);
+            textViewDate = itemView.findViewById(R.id.text_view_post_date);
+            textViewTime = itemView.findViewById(R.id.text_view_post_time);
         }
 
         //This function has been defined to seperate the code of binding the data with the views
         //Othewise the data binding could be done inside the Adapter's onBindViewHolder function
         public void bindData(final Post post) {
             System.out.println("bindData called");
-            username.setText(post.getCaption());
+            this.post=post;
+            String postUrl = "posts/"+post.getYearId()+"/"+post.getMonthId()+"/"+post.getPostId();
+            postReference = database.getReference(postUrl);
+            if(signedInMember!=null) {
+                post.syncOwnerData(signedInMember);
+            }
+            else if(trialMember!=null) {
+                post.syncOwnerData(trialMember);
+            }
+            postReference.setValue(post);
+            username.setText(post.getOwnerName());
+            textViewCaption.setText(post.getCaption());
             Glide.with(recyclerView)
                     .load(post.getImageUrl())
                     .into(imageView);
+            textViewLikeCount.setText(String.valueOf(post.getLikesIds().size()));
+
+            /* ************************** Setting up the date and time *********************************** */
+            String date=post.getDay()+"/"+post.getMonthId().substring(1)+"/"+post.getYearId().substring(1);
+            textViewDate.setText(date);
+            textViewTime.setText(post.getTime());
+            /* **************************************************************************************/
+
+            imageButtonLike.setOnClickListener(this);
+
+            boolean deleteButtonVisible = (signedInMember!=null && post.getOwnerSapId().equals(signedInMember.getSap()))
+                    || (trialMember!=null && post.getOwnerSapId().equals(trialMember.getSap()));
+            if(deleteButtonVisible)
+                imageButtonDelete.setVisibility(View.VISIBLE);
+            else
+                imageButtonDelete.setVisibility(View.GONE);
+            imageButtonDelete.setOnClickListener(this);
+
+        }
+
+        @Override
+        public void onClick(View view) {
+            System.out.println("Liked button pressed");
+            if (view.getId() == R.id.image_button_post_like) {
+                if(signedInMember != null || trialMember!=null) {
+                    System.out.println("like button signedInMember is not null");
+                    boolean previouslyLiked = false;
+                    int pos = 0;
+
+                    String signedInUserSap = (signedInMember==null)?trialMember.getSap():signedInMember.getSap();
+                    for (String ownerSapId : post.getLikesIds()) {
+                        System.out.println("member id : " + ownerSapId);
+                        if (ownerSapId.equals(signedInUserSap)) {
+                            previouslyLiked = true;
+                            break;
+                        }
+                        pos++;
+                    }
+                    if (previouslyLiked)
+                        post.getLikesIds().remove(pos);
+                    else
+                        post.getLikesIds().add(signedInUserSap);
+                    textViewLikeCount.setText(String.valueOf(post.getLikesIds().size()));
+                    postReference.setValue(post);
+                }
+                else {
+                    Toast.makeText(recyclerView.getContext(),"Please log in to like",Toast.LENGTH_LONG).show();
+                    System.out.println("like button User not signed in");
+                }
+
+            }
+            else if(view.getId() == R.id.image_button_post_delete){
+                System.out.println("deleting post");
+                Post nullPost=new Post();
+                postReference.setValue(nullPost);
+            }
         }
     }
 
@@ -109,6 +216,16 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     public void setPosts(ArrayList<Post> posts) {
         System.out.println("set Posts called : "+posts.size());
         this.posts=posts;
+        notifyDataSetChanged();
+    }
+
+    public void setSignedInMember(Member signedInMember) {
+        this.signedInMember = signedInMember;
+        notifyDataSetChanged();
+    }
+
+    public void setTrialMember(TrialMember trialMember) {
+        this.trialMember = trialMember;
         notifyDataSetChanged();
     }
 

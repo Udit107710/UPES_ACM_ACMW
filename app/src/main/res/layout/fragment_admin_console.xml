@@ -15,6 +15,7 @@
         <ListView
             android:id="@+id/listview_admin_console"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:divider="@null"/>
     </android.support.constraint.ConstraintLayout>
 </FrameLayout>

@@ -21,6 +21,7 @@ import org.upesacm.acmacmw.fragment.homepage.ContactUsFragment;
 import org.upesacm.acmacmw.fragment.homepage.HierarchyFragment;
 import org.upesacm.acmacmw.fragment.homepage.PostsFragment;
 import org.upesacm.acmacmw.fragment.homepage.UpcomingEventsFragment;
+import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 
 import java.lang.reflect.Field;
@@ -32,11 +33,12 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
     private HomePageClient homePageClient;
     Context context;
     private FragmentManager childFm;
+
     public HomePageFragment() {
         // Required empty public constructor
     }
 
-    public static Fragment newInstance(HomePageClient homePageClient,Context context) {
+    public static HomePageFragment newInstance(HomePageClient homePageClient,Context context) {
         HomePageFragment homePageFragment=new HomePageFragment();
         homePageFragment.homePageClient=homePageClient;
         homePageFragment.context=context;

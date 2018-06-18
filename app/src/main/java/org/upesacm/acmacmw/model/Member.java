@@ -1,6 +1,9 @@
 package org.upesacm.acmacmw.model;
 
-public class Member {
+import android.os.Parcel;
+import android.os.Parcelable;
+
+public class Member implements Parcelable{
 
     private String memberId;
     private String name;
@@ -10,6 +13,31 @@ public class Member {
     private String year;
     private String email;
     private String contact;
+
+    Member() {}
+
+    protected Member(Parcel in) {
+        memberId = in.readString();
+        name = in.readString();
+        password = in.readString();
+        sap = in.readString();
+        branch = in.readString();
+        year = in.readString();
+        email = in.readString();
+        contact = in.readString();
+    }
+
+    public static final Creator<Member> CREATOR = new Creator<Member>() {
+        @Override
+        public Member createFromParcel(Parcel in) {
+            return new Member(in);
+        }
+
+        @Override
+        public Member[] newArray(int size) {
+            return new Member[size];
+        }
+    };
 
     public String getBranch() {
         return branch;
@@ -40,6 +68,23 @@ public class Member {
 
     public String getPassword() {
         return password;
+    }
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel parcel, int i) {
+        parcel.writeString(memberId);
+        parcel.writeString(name);
+        parcel.writeString(password);
+        parcel.writeString(sap);
+        parcel.writeString(branch);
+        parcel.writeString(year);
+        parcel.writeString(email);
+        parcel.writeString(contact);
     }
 
     public static class Builder {
