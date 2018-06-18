@@ -1,5 +1,8 @@
 package org.upesacm.acmacmw.adapter;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
@@ -77,6 +80,23 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
         if(holder instanceof PostViewHolder) {
             Post post=posts.get(position);
             ((PostViewHolder) holder).bindData(post);
+
+            if(signedInMember != null || trialMember!=null) {
+                boolean previouslyLiked = false;
+
+                String signedInUserSap = (signedInMember == null) ? trialMember.getSap() : signedInMember.getSap();
+                for (String ownerSapId : post.getLikesIds()) {
+                    if (ownerSapId.equals(signedInUserSap)) {
+                        previouslyLiked = true;
+                        break;
+                    }
+                }
+                if (previouslyLiked) {
+                    ((PostViewHolder) holder).imageButtonLike.setImageResource(R.drawable.ic_thumb_up_blue_24dp);
+                } else {
+                    ((PostViewHolder) holder).imageButtonLike.setImageResource(R.drawable.like);
+                }
+            }
         }
     }
 
@@ -174,12 +194,15 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
                         System.out.println("member id : " + ownerSapId);
                         if (ownerSapId.equals(signedInUserSap)) {
                             previouslyLiked = true;
+
                             break;
                         }
                         pos++;
+                        imageButtonLike.setImageResource(R.drawable.ic_thumb_up_blue_24dp);
                     }
-                    if (previouslyLiked)
+                    if (previouslyLiked){
                         post.getLikesIds().remove(pos);
+                        imageButtonLike.setImageResource(R.drawable.like);}
                     else
                         post.getLikesIds().add(signedInUserSap);
                     textViewLikeCount.setText(String.valueOf(post.getLikesIds().size()));
@@ -196,10 +219,34 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
                 }
 
             }
-            else if(view.getId() == R.id.image_button_post_delete){
+            else if(view.getId() == R.id.image_button_post_delete) {
                 System.out.println("deleting post");
-                Post nullPost=new Post();
-                postReference.setValue(nullPost);
+                if (itemView != null) {
+                    final Context context = itemView.getContext();
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+                    alertDialog.setTitle("Delete this Post");
+                    alertDialog.setMessage("Are you Sure ? ");
+                    alertDialog.setPositiveButton("SURE", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Post nullPost = new Post();
+                            postReference.setValue(nullPost);
+                            Toast.makeText(context,"Deleted Sucessfully",Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    alertDialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            // DO SOMETHING HERE
+
+                        }
+                    });
+
+                    AlertDialog dialog = alertDialog.create();
+                    dialog.show();
+
+                }
             }
         }
     }
