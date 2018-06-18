@@ -30,7 +30,10 @@
     <string name="new_member_sap_key">new member sap</string>
     <string name="new_member_key">new member key</string>
     <string name="logged_in_member_key">logged in member key</string>
+    <string name="trial_member_sap">Trial membe sap</string>
     <string name="logged_in_member_details_key">logged in member details</string>
+    <string name="post_owner_id_key">Post owner id</string>
+    <string name="post_owner_name_key">Post owner name</string>
 
     <string name="logout_confirmation">Are you sure you want to log out?</string>
 
@@ -45,6 +48,7 @@
     <string name="fragment_tag_new_member_registration">New Member Registration</string>
     <string name="dialog_fragment_tag_login">Login dialog fragment</string>
     <string name="dialog_fragment_tag_pass_change">Pass Change dialog fragment</string>
+    <string name="fragment_tag_google_sign_in">Google Sign Fragment</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

@@ -87,16 +87,6 @@
             app:layout_constraintTop_toBottomOf="@+id/image_view_post">
 
             <TextView
-                android:id="@+id/text_view_post_caption"
-                android:layout_width="wrap_content"
-                android:layout_height="match_parent"
-                android:layout_weight="1"
-                android:padding="8dp"
-                android:text="TextView"
-                android:textAlignment="viewStart"
-                android:textColor="@android:color/black" />
-
-            <TextView
                 android:id="@+id/text_view_post_likecount"
                 android:layout_width="wrap_content"
                 android:layout_height="match_parent"
@@ -120,6 +110,16 @@
                 android:layout_weight="0"
                 android:visibility="gone"
                 card_view:srcCompat="@android:drawable/ic_menu_delete" />
+
+            <TextView
+                android:id="@+id/text_view_post_caption"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_weight="1"
+                android:padding="8dp"
+                android:text="TextView"
+                android:textAlignment="viewStart"
+                android:textColor="@android:color/black" />
 
 
         </LinearLayout>

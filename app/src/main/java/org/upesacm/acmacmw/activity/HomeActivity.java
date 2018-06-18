@@ -23,11 +23,19 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+
 import org.upesacm.acmacmw.asynctask.OTPSender;
 import org.upesacm.acmacmw.fragment.AboutFragment;
 import org.upesacm.acmacmw.fragment.AdminConsoleFragment;
 import org.upesacm.acmacmw.fragment.AlumniFragment;
 import org.upesacm.acmacmw.fragment.EditProfileFragment;
+import org.upesacm.acmacmw.fragment.GoogleSignInFragment;
 import org.upesacm.acmacmw.fragment.ImageUploadFragment;
 import org.upesacm.acmacmw.fragment.LoginDialogFragment;
 import org.upesacm.acmacmw.R;
@@ -42,11 +50,14 @@ import org.upesacm.acmacmw.fragment.homepage.PostsFragment;
 import org.upesacm.acmacmw.listener.HomeActivityStateChangeListener;
 import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.NewMember;
+import org.upesacm.acmacmw.model.TrialMember;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 import org.upesacm.acmacmw.retrofit.MembershipClient;
 import org.upesacm.acmacmw.util.MemberIDGenerator;
 
+import java.net.NoRouteToHostException;
 import java.util.ArrayList;
+import java.util.Calendar;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -63,7 +74,9 @@ public class HomeActivity extends AppCompatActivity implements
         View.OnClickListener,
         UserProfileFragment.FragmentInteractioListener,
         EditProfileFragment.FragmentInteractionListener,
-        PasswordChangeDialogFragment.PasswordChangeListener{
+        PasswordChangeDialogFragment.PasswordChangeListener,
+        GoogleSignInFragment.GoogleSignInListener{
+
     private static final String BASE_URL="https://acm-acmw-app-6aa17.firebaseio.com/";
     private static final int ADMIN_CONSOLE_MENU_ID = 1;
 
@@ -76,6 +89,7 @@ public class HomeActivity extends AppCompatActivity implements
     private HomePageClient homePageClient;
     private MembershipClient membershipClient;
     private Member signedInMember;
+    private TrialMember trialMember;
     private View headerLayout;
     private String newMemberSap;
 
@@ -107,6 +121,16 @@ public class HomeActivity extends AppCompatActivity implements
             public void onMemberLogout() {
                 System.out.println("Default onMemberLogout");
             }
+
+            @Override
+            public void onGoogleSignIn(TrialMember member) {
+                System.out.println("Default onMemberLogout google sign in");
+            }
+
+            @Override
+            public void onGoogleSignOut() {
+                System.out.println("default on google sigon out ");
+            }
         };
         stateChangeListeners.add(defaultStateChangeListener);
 
@@ -125,7 +149,7 @@ public class HomeActivity extends AppCompatActivity implements
         fragmentTransaction.replace(R.id.frame_layout,homePageFragment,"homepage");
         fragmentTransaction.commit();
         /* *********************************************************************************/
-//statechange listener is not added when the setMemberProfile is called for the first time
+
         navigationView.setNavigationItemSelectedListener(this);
         navigationView.setCheckedItem(R.id.action_home);
         headerLayout=navigationView.getHeaderView(0);
@@ -136,12 +160,36 @@ public class HomeActivity extends AppCompatActivity implements
         Bundle bundle = getIntent().getExtras();
         if(bundle!=null) {
             signedInMember = (Member)bundle.get(getString(R.string.logged_in_member_details_key));
-            setUpMemberProfile(signedInMember);
+            if(signedInMember!=null)
+                setUpMemberProfile(signedInMember);
+        }
+
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        SharedPreferences preferences=getSharedPreferences(getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE);
+        final String trialMemberSap=preferences.getString(getString(R.string.trial_member_sap),null);
+        if(account!=null && trialMemberSap!=null) {
+            homePageClient.getTrialMember(trialMemberSap)
+                    .enqueue(new Callback<TrialMember>() {
+                        @Override
+                        public void onResponse(Call<TrialMember> call, Response<TrialMember> response) {
+                            trialMember = response.body();
+                            System.out.println("get trial member  : "+trialMember);
+                            for(HomeActivityStateChangeListener listener:stateChangeListeners) {
+                                listener.onGoogleSignIn(trialMember);
+                            }
+                        }
+
+                        @Override
+                        public void onFailure(Call<TrialMember> call, Throwable t) {
+
+                        }
+                    });
+        }
+        else if(account!=null) {
+            signOutFromGoogle();
         }
         System.out.println("signedInMember : "+signedInMember);
-
-
-
 
     }
 
@@ -225,9 +273,18 @@ public class HomeActivity extends AppCompatActivity implements
         /* ************************** Saving sign in info in locallly *********************  */
         SharedPreferences.Editor editor=getSharedPreferences(getString(R.string.preference_file_key),
                 Context.MODE_PRIVATE).edit();
+        editor.clear(); // clear the trial member data if any
         editor.putString(getString(R.string.logged_in_member_key),member.getSap());
         editor.commit();
         /* ************************************************************************************/
+
+        /* *********************** Clearing the trial member data before loggin in ***********/
+        this.trialMember=null;
+        GoogleSignInAccount account = GoogleSignIn.getLastSignedInAccount(this);
+        if(account!=null) {
+            signOutFromGoogle();
+        }
+        /* *************************************************************************************/
         this.signedInMember=member;
         customizeNavigationDrawer(true);
 
@@ -258,7 +315,6 @@ public class HomeActivity extends AppCompatActivity implements
                     })
                     .create()
                     .show();
-            super.onBackPressed();
         }
         else if(isVisible((getString(R.string.fragment_tag_image_upload)))) {
             System.out.println("back pressed image upload fragment ");
@@ -334,8 +390,33 @@ public class HomeActivity extends AppCompatActivity implements
         System.out.println("addOnHomeActivityStateChangeListener");
         stateChangeListeners.add(listener);
         //call the listener once after intially adding it
-        if(signedInMember!=null)
-            listener.onMemberLogin(signedInMember);
+        listener.onMemberLogin(signedInMember);
+        listener.onGoogleSignIn(trialMember);
+    }
+
+    void signOutFromGoogle() {
+        GoogleSignInOptions signInOptions = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+                .requestEmail()
+                .build();
+        GoogleSignInClient signInClient = GoogleSignIn.getClient(this,signInOptions);
+        signInClient.signOut()
+                .addOnSuccessListener(new OnSuccessListener<Void>() {
+                    @Override
+                    public void onSuccess(Void aVoid) {
+                        for(HomeActivityStateChangeListener listener:stateChangeListeners) {
+                            System.out.println("calling state change listeners onGoogleSignout");
+                            listener.onGoogleSignOut();
+                        }
+                        System.out.println("Successfully signed out from google");
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception e) {
+                        e.printStackTrace();
+                        System.out.println("failed to sign out from google");
+                    }
+                });
     }
 
 
@@ -634,4 +715,68 @@ public class HomeActivity extends AppCompatActivity implements
     }
 
 
+    @Override
+    public void onGoogleSignIn(final String sap,GoogleSignInAccount account) {
+        if(account!=null) {
+            final TrialMember trialMember = new TrialMember.Builder(String.valueOf(Calendar.getInstance().getTimeInMillis()))
+                    .setEmail(account.getEmail())
+                    .setName(account.getDisplayName())
+                    .setSap(sap)
+                    .build();
+            homePageClient.getTrialMember(sap)
+                    .enqueue(new Callback<TrialMember>() {
+                        @Override
+                        public void onResponse(Call<TrialMember> call, Response<TrialMember> response) {
+                            if(response.body()==null) {
+                                homePageClient.createTrialMember(sap,trialMember)
+                                        .enqueue(new Callback<TrialMember>() {
+                                            @Override
+                                            public void onResponse(Call<TrialMember> call, Response<TrialMember> response) {
+                                                System.out.println("createTrialMember response : "+response.message());
+                                                SharedPreferences.Editor editor=getSharedPreferences(getString(R.string.preference_file_key),
+                                                        Context.MODE_PRIVATE).edit();
+                                                editor.putString(getString(R.string.trial_member_sap),sap);
+                                                editor.commit();
+
+                                                HomeActivity.this.trialMember=trialMember;
+                                                System.out.println("inside home activity onGoogleSignIn"+trialMember);
+
+                                                for(HomeActivityStateChangeListener listener:stateChangeListeners) {
+                                                    System.out.println(trialMember);
+                                                    listener.onGoogleSignIn(trialMember);
+                                                }
+                                                Toast.makeText(HomeActivity.this, "trial member created", Toast.LENGTH_LONG).show();
+                                                onBackPressed();
+                                            }
+
+                                            @Override
+                                            public void onFailure(Call<TrialMember> call, Throwable t) {
+                                                t.printStackTrace();
+                                                Toast.makeText(HomeActivity.this, "unable to create trial member", Toast.LENGTH_LONG).show();
+                                            }
+                                        });
+                            }
+                            else {
+                                HomeActivity.this.trialMember=response.body();
+                                for(HomeActivityStateChangeListener listener:stateChangeListeners) {
+                                    System.out.println(trialMember);
+                                    listener.onGoogleSignIn(trialMember);
+                                }
+                                Toast.makeText(HomeActivity.this, "trial member present", Toast.LENGTH_LONG).show();
+                                onBackPressed();
+                            }
+
+                        }
+
+                        @Override
+                        public void onFailure(Call<TrialMember> call, Throwable t) {
+                            Toast.makeText(HomeActivity.this, "unable to verify trial member", Toast.LENGTH_LONG).show();
+                        }
+                    });
+
+        }
+        else {
+            Toast.makeText(this, "unable to sign in", Toast.LENGTH_LONG).show();
+        }
+    }
 }

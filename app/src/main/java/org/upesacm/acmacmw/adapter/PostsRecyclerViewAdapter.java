@@ -1,5 +1,6 @@
 package org.upesacm.acmacmw.adapter;
 
+import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
@@ -9,13 +10,20 @@ import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.listener.OnLoadMoreListener;
 import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.Post;
+import org.upesacm.acmacmw.model.TrialMember;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 
 import java.util.ArrayList;
@@ -32,15 +40,18 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     ArrayList<Post> posts;
     HomePageClient homePageClient;
     Member signedInMember;
+    TrialMember trialMember;
+    FirebaseDatabase database;
     public PostsRecyclerViewAdapter(RecyclerView recyclerView, HomePageClient homePageClient,
-                                    Member signedInMember) {
+                                    FirebaseDatabase database) {
         this.recyclerView=recyclerView;
         this.homePageClient = homePageClient;
         this.signedInMember = signedInMember;
+        this.trialMember = trialMember;
+        this.database=database;
         addOnScrollListener();
     }
     @Override
-
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         System.out.println("onCreateViewHolder : "+viewType);
         //NOTE : Apprently when inflating views inside constraint layout it is important to specify the root(constraint layout)
@@ -82,7 +93,8 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
     }
 
     public class PostViewHolder extends RecyclerView.ViewHolder
-            implements View.OnClickListener {
+            implements
+            View.OnClickListener {
         private TextView username;
         private TextView textViewCaption;
         private ImageView imageView;
@@ -92,6 +104,8 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
         private TextView textViewDate;
         private TextView textViewTime;
         private Post post;
+        private DatabaseReference ownerReference;
+        private DatabaseReference postReference;
         public PostViewHolder(View itemView) {
             super(itemView);
             username=itemView.findViewById(R.id.text_view_post_username);
@@ -109,26 +123,37 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
         public void bindData(final Post post) {
             System.out.println("bindData called");
             this.post=post;
-            username.setText(post.getMemberId());
+            String postUrl = "posts/"+post.getYearId()+"/"+post.getMonthId()+"/"+post.getPostId();
+            postReference = database.getReference(postUrl);
+            if(signedInMember!=null) {
+                post.syncOwnerData(signedInMember);
+            }
+            else if(trialMember!=null) {
+                post.syncOwnerData(trialMember);
+            }
+            postReference.setValue(post);
+            username.setText(post.getOwnerName());
             textViewCaption.setText(post.getCaption());
             Glide.with(recyclerView)
                     .load(post.getImageUrl())
                     .into(imageView);
             textViewLikeCount.setText(String.valueOf(post.getLikesIds().size()));
-            /* ************ Setting up the date and time **************************** */
+
+            /* ************************** Setting up the date and time *********************************** */
             String date=post.getDay()+"/"+post.getMonthId().substring(1)+"/"+post.getYearId().substring(1);
             textViewDate.setText(date);
-
             textViewTime.setText(post.getTime());
-            /* ********************************************************************/
+            /* **************************************************************************************/
+
             imageButtonLike.setOnClickListener(this);
 
-            if(signedInMember!=null && post.getMemberId().equals(signedInMember.getMemberId()))
+            boolean deleteButtonVisible = (signedInMember!=null && post.getOwnerSapId().equals(signedInMember.getSap()))
+                    || (trialMember!=null && post.getOwnerSapId().equals(trialMember.getSap()));
+            if(deleteButtonVisible)
                 imageButtonDelete.setVisibility(View.VISIBLE);
             else
                 imageButtonDelete.setVisibility(View.GONE);
             imageButtonDelete.setOnClickListener(this);
-
 
         }
 
@@ -136,13 +161,15 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
         public void onClick(View view) {
             System.out.println("Liked button pressed");
             if (view.getId() == R.id.image_button_post_like) {
-                if(signedInMember != null) {
+                if(signedInMember != null || trialMember!=null) {
                     System.out.println("like button signedInMember is not null");
                     boolean previouslyLiked = false;
                     int pos = 0;
-                    for (String memberId : post.getLikesIds()) {
-                        System.out.println("member id : " + memberId);
-                        if (memberId.equals(signedInMember.getMemberId())) {
+
+                    String signedInUserSap = (signedInMember==null)?trialMember.getSap():signedInMember.getSap();
+                    for (String ownerSapId : post.getLikesIds()) {
+                        System.out.println("member id : " + ownerSapId);
+                        if (ownerSapId.equals(signedInUserSap)) {
                             previouslyLiked = true;
                             break;
                         }
@@ -151,23 +178,12 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
                     if (previouslyLiked)
                         post.getLikesIds().remove(pos);
                     else
-                        post.getLikesIds().add(signedInMember.getMemberId());
+                        post.getLikesIds().add(signedInUserSap);
                     textViewLikeCount.setText(String.valueOf(post.getLikesIds().size()));
-                    homePageClient.createPost(post.getYearId(), post.getMonthId(), post.getPostId(), post)
-                            .enqueue(new Callback<Post>() {
-                                @Override
-                                public void onResponse(Call<Post> call, Response<Post> response) {
-                                    System.out.println("likes count successfully updated");
-                                    textViewLikeCount.setText(String.valueOf(post.getLikesIds().size()));
-                                }
-
-                                @Override
-                                public void onFailure(Call<Post> call, Throwable t) {
-                                    System.out.println("failed to update the like count");
-                                }
-                            });
+                    postReference.setValue(post);
                 }
                 else {
+                    Toast.makeText(recyclerView.getContext(),"Please log in to like",Toast.LENGTH_LONG).show();
                     System.out.println("like button User not signed in");
                 }
 
@@ -175,22 +191,9 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
             else if(view.getId() == R.id.image_button_post_delete){
                 System.out.println("deleting post");
                 Post nullPost=new Post();
-                homePageClient.createPost(post.getYearId(),post.getMonthId(),post.getPostId(),nullPost)
-                        .enqueue(new Callback<Post>() {
-                            @Override
-                            public void onResponse(Call<Post> call, Response<Post> response) {
-                                System.out.println("post deleted : "+response.message());
-                            }
-
-                            @Override
-                            public void onFailure(Call<Post> call, Throwable t) {
-                                t.printStackTrace();
-                                System.out.println("failed to delete post");
-                            }
-                        });
+                postReference.setValue(nullPost);
             }
         }
-
     }
 
     public class LoadingViewHolder extends RecyclerView.ViewHolder {
@@ -218,6 +221,11 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
 
     public void setSignedInMember(Member signedInMember) {
         this.signedInMember = signedInMember;
+        notifyDataSetChanged();
+    }
+
+    public void setTrialMember(TrialMember trialMember) {
+        this.trialMember = trialMember;
         notifyDataSetChanged();
     }
 

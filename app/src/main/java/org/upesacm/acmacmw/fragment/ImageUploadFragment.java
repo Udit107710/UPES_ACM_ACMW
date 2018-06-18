@@ -65,7 +65,8 @@ public class ImageUploadFragment extends Fragment implements
     StorageReference storageRef = storage.getReference();
     UploadResultListener resultListener;
     TextView textViewUpload;
-    String memberId;
+    String ownerSapId;
+    String ownerName;
     String yearId;
     String monthId;
     String postId;
@@ -76,12 +77,10 @@ public class ImageUploadFragment extends Fragment implements
         // Required empty public constructor
     }
 
-    public static ImageUploadFragment newInstance(HomePageClient homePageClient,String memberId) {
+    public static ImageUploadFragment newInstance(HomePageClient homePageClient) {
         ImageUploadFragment fragment = new ImageUploadFragment();
         fragment.homePageClient=homePageClient;
-        fragment.memberId=memberId;
 
-        System.out.println("fragment constructor : "+memberId);
         return fragment;
     }
 
@@ -101,8 +100,13 @@ public class ImageUploadFragment extends Fragment implements
                              Bundle savedInstanceState) {
         View view=inflater.inflate(R.layout.fragment_image_upload,container,false);
 
-        byteArray = getArguments().getByteArray("image_data");
+        Bundle bundle = getArguments();
+        byteArray = bundle.getByteArray("image_data");
+        ownerSapId = bundle.getString(getString(R.string.post_owner_id_key),null);
+        ownerName = bundle.getString(getString(R.string.post_owner_name_key),null);
         System.out.println("image data : "+byteArray);
+
+        System.out.println("image upload frag  : name : "+ownerName);
 
         Bitmap bmp = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
         ImageView imageView=view.findViewById(R.id.imageView);
@@ -133,7 +137,7 @@ public class ImageUploadFragment extends Fragment implements
         Calendar calendar=Calendar.getInstance();
         yearId="Y"+calendar.get(Calendar.YEAR);
         monthId="M"+calendar.get(Calendar.MONTH);
-        postId="ACM"+Calendar.getInstance().getTimeInMillis()+memberId.substring(3,memberId.length());
+        postId="ACM"+Calendar.getInstance().getTimeInMillis()+ownerSapId.substring(3,ownerSapId.length());
         day=String.valueOf(calendar.get(Calendar.DAY_OF_MONTH));
 
         String hour=String.valueOf(calendar.get(Calendar.HOUR_OF_DAY));
@@ -144,7 +148,7 @@ public class ImageUploadFragment extends Fragment implements
 
         System.out.println("postId : "+postId);
 
-        storageRef = storageRef.child(memberId+"/"+postId+".png");
+        storageRef = storageRef.child(ownerSapId+"/"+postId+".png");
         uploadTask =  storageRef.putBytes(byteArray);
         uploadTask.addOnSuccessListener(this)
                 .addOnFailureListener(this)
@@ -186,7 +190,8 @@ public class ImageUploadFragment extends Fragment implements
                             .setCaption(caption.getText().toString())
                             .setDay(day)
                             .setTime(time)
-                            .setMemberId(memberId)
+                            .setOwnerSapId(ownerSapId)
+                            .setOwnerName(ownerName)
                             .build();
                     Call<Post> newPostCall= homePageClient.createPost(post.getYearId(),
                             post.getMonthId(),

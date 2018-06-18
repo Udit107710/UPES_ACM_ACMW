@@ -6,6 +6,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
@@ -29,6 +30,8 @@ import android.view.ViewGroup;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -40,11 +43,14 @@ import org.upesacm.acmacmw.Manifest;
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.activity.HomeActivity;
 import org.upesacm.acmacmw.adapter.PostsRecyclerViewAdapter;
+import org.upesacm.acmacmw.fragment.GoogleSignInFragment;
 import org.upesacm.acmacmw.fragment.ImageUploadFragment;
+import org.upesacm.acmacmw.fragment.LoginDialogFragment;
 import org.upesacm.acmacmw.listener.HomeActivityStateChangeListener;
 import org.upesacm.acmacmw.listener.OnLoadMoreListener;
 import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.Post;
+import org.upesacm.acmacmw.model.TrialMember;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 
 import java.io.ByteArrayOutputStream;
@@ -68,7 +74,8 @@ public class PostsFragment extends Fragment
         implements OnLoadMoreListener,
         Callback<HashMap<String,Post>>,
         ValueEventListener,
-        HomeActivityStateChangeListener{
+        HomeActivityStateChangeListener,
+        View.OnClickListener {
 
     static final int CHOOSE_FROM_GALLERY=2;
     static final int REQUEST_IMAGE_CAPTURE = 1;
@@ -80,12 +87,13 @@ public class PostsFragment extends Fragment
     RecyclerView recyclerView;
     ProgressBar progressBar;
     private int monthCount=-1;
+    FirebaseDatabase database;
     private DatabaseReference postsReference;
     PostsRecyclerViewAdapter recyclerViewAdapter;
     FloatingActionButton floatingActionButton;
 
     Member signedInMember;
-
+    TrialMember trialMember;
     private Uri imageUri;
 
     public PostsFragment() {
@@ -101,16 +109,12 @@ public class PostsFragment extends Fragment
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        System.out.println("onCreate home page fragment");
+        System.out.println("onCreate post fragment");
         childFm=getChildFragmentManager();
 
-        Bundle bundle=getArguments();
-        if(bundle!=null) {
-
-        }
-
         Calendar calendar = Calendar.getInstance();
-        postsReference= FirebaseDatabase.getInstance()
+        database = FirebaseDatabase.getInstance();
+        postsReference= database
                 .getReference("posts/"+"Y"+calendar.get(Calendar.YEAR)+"/"
                         +"M"+calendar.get(Calendar.MONTH));
     }
@@ -124,20 +128,11 @@ public class PostsFragment extends Fragment
         recyclerView=view.findViewById(R.id.posts_recyclerView);
         progressBar = view.findViewById(R.id.progress_bar_home);
         floatingActionButton = view.findViewById(R.id.cameraButton);
-        floatingActionButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                if(signedInMember!=null) {
-                    onCameraButtonClick(view);
-                }
-                else {
-                    //opne the google sign in activity here
-                }
-            }
-        });
+        floatingActionButton.setOnClickListener(this);
+        recyclerViewAdapter=new PostsRecyclerViewAdapter(recyclerView,homePageClient,database);
 
-        recyclerViewAdapter=new PostsRecyclerViewAdapter(recyclerView,homePageClient,signedInMember);
         recyclerViewAdapter.setOnLoadMoreListener(this);
+
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
         recyclerView.setAdapter(recyclerViewAdapter);
@@ -149,9 +144,42 @@ public class PostsFragment extends Fragment
         progressBar.setVisibility(View.VISIBLE);
 
         ((HomeActivity)getActivity()).addOnHomeActivityStateChangeListener(this);
+
         return view;
     }
 
+    @Override
+    public void onClick(View view) {
+        if (view.getId() == R.id.cameraButton) {
+            System.out.println("cameraButton pressed"+trialMember);
+            if (signedInMember != null ) {
+                onCameraButtonClick(view);
+            }
+            else if(trialMember!=null) {
+                long trialPeriod=30*24*60*60*(1000L);
+                long elapsedTime = Calendar.getInstance().getTimeInMillis() - Long.parseLong(trialMember.getCreationTimeStamp());
+                System.out.println("trialPerion : "+trialPeriod);
+                System.out.println("elasped : "+elapsedTime);
+                if(elapsedTime > trialPeriod) {
+                    Toast.makeText(getContext(),"Your free trial is over",Toast.LENGTH_LONG).show();
+                }
+                else {
+                    Toast.makeText(getContext(), "time remainging : " + (trialPeriod - elapsedTime), Toast.LENGTH_LONG).show();
+                    onCameraButtonClick(view);
+                }
+            }
+            else {
+                Toast.makeText(getContext(), "Please Login First", Toast.LENGTH_SHORT).show();
+                GoogleSignInFragment fragment = new GoogleSignInFragment();
+                getActivity().getSupportFragmentManager().beginTransaction()
+                        .replace(R.id.frame_layout, fragment, getString(R.string.fragment_tag_google_sign_in))
+                        .commit();
+            }
+        }
+        else {
+            System.out.println("unexpected on click callback");
+        }
+    }
 
 
 
@@ -351,7 +379,23 @@ public class PostsFragment extends Fragment
         System.out.println("on new post data available called");
         ((HomeActivity)getContext()).getSupportActionBar().hide();
         ((HomeActivity)getContext()).setDrawerEnabled(false);
-        ImageUploadFragment imageUploadFragment=ImageUploadFragment.newInstance(homePageClient,signedInMember.getMemberId());
+        ImageUploadFragment imageUploadFragment=ImageUploadFragment.newInstance(homePageClient);
+
+        String ownerName=null;
+        String ownerSapId=null;
+        if(signedInMember!=null) {
+            ownerSapId=signedInMember.getSap();
+            ownerName=signedInMember.getName();
+        }
+        else if(trialMember!=null) {
+            ownerSapId=trialMember.getSap();
+            ownerName=trialMember.getName();
+
+            System.out.println("trial memeber : "+ownerSapId);
+            System.out.println("trial member : "+ownerName);
+        }
+        args.putString(getString(R.string.post_owner_id_key),ownerSapId);
+        args.putString(getString(R.string.post_owner_name_key),ownerName);
         imageUploadFragment.setArguments(args);
 
         FragmentTransaction ft=((HomeActivity)getContext()).getSupportFragmentManager().beginTransaction();
@@ -389,4 +433,20 @@ public class PostsFragment extends Fragment
         this.signedInMember=null;
         recyclerViewAdapter.setSignedInMember(null);
     }
+
+    @Override
+    public void onGoogleSignIn(TrialMember trialMember) {
+        System.out.println("post fragment on google sign in callback called"+trialMember);
+        this.trialMember=trialMember;
+        recyclerViewAdapter.setTrialMember(trialMember);
+    }
+
+    @Override
+    public void onGoogleSignOut() {
+        System.out.println("post fragment on google sign out");
+        this.trialMember=null;
+        recyclerViewAdapter.setTrialMember(null);
+    }
+
+
 }
