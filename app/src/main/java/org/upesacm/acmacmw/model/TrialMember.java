@@ -6,9 +6,14 @@ public class TrialMember {
     private String name;
     private String creationTimeStamp;
     private String imageUrl;
+    private String otp;
 
     public String getImageUrl() {
         return imageUrl;
+    }
+
+    public String getOtp() {
+        return otp;
     }
 
     public String getSap() {
@@ -33,6 +38,7 @@ public class TrialMember {
         private String name;
         private String timeStamp;
         private String imageUrl;
+        private String otp;
         public Builder(String timeStamp) {
             this.timeStamp=timeStamp;
         }
@@ -43,6 +49,7 @@ public class TrialMember {
             trialMember.name=name;
             trialMember.creationTimeStamp=timeStamp;
             trialMember.imageUrl=imageUrl;
+            trialMember.otp=otp;
             System.out.println("trial member time stamp : "+trialMember.getCreationTimeStamp());
             return trialMember;
         }
@@ -64,6 +71,11 @@ public class TrialMember {
 
         public Builder setImageUrl(String imageUrl) {
             this.imageUrl=imageUrl;
+            return this;
+        }
+
+        public Builder setOtp(String otp) {
+            this.otp = otp;
             return this;
         }
     }

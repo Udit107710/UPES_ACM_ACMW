@@ -30,6 +30,8 @@ import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.upesacm.acmacmw.asynctask.OTPSender;
 import org.upesacm.acmacmw.fragment.AboutFragment;
@@ -46,6 +48,7 @@ import org.upesacm.acmacmw.fragment.OTPVerificationFragment;
 import org.upesacm.acmacmw.fragment.OngoingProjectFragment;
 import org.upesacm.acmacmw.fragment.PasswordChangeDialogFragment;
 import org.upesacm.acmacmw.fragment.StudyMaterialFragment;
+import org.upesacm.acmacmw.fragment.TrialMemberOTPVerificationFragment;
 import org.upesacm.acmacmw.fragment.UserProfileFragment;
 import org.upesacm.acmacmw.fragment.homepage.PostsFragment;
 import org.upesacm.acmacmw.listener.HomeActivityStateChangeListener;
@@ -55,6 +58,7 @@ import org.upesacm.acmacmw.model.TrialMember;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 import org.upesacm.acmacmw.retrofit.MembershipClient;
 import org.upesacm.acmacmw.util.MemberIDGenerator;
+import org.upesacm.acmacmw.util.RandomOTPGenerator;
 
 import java.net.NoRouteToHostException;
 import java.util.ArrayList;
@@ -76,11 +80,14 @@ public class HomeActivity extends AppCompatActivity implements
         UserProfileFragment.FragmentInteractioListener,
         EditProfileFragment.FragmentInteractionListener,
         PasswordChangeDialogFragment.PasswordChangeListener,
-        GoogleSignInFragment.GoogleSignInListener{
+        GoogleSignInFragment.GoogleSignInListener,
+        TrialMemberOTPVerificationFragment.TrialOTPVerificationListener{
 
     private static final String BASE_URL="https://acm-acmw-app-6aa17.firebaseio.com/";
     private static final int ADMIN_CONSOLE_MENU_ID = 1;
-
+    private static final int STATE_MEMBER_SIGNED_IN=1;
+    private static final int STATE_TRIAL_MEMBER_SIGNED_IN=2;
+    private static final int STATE_DEFAULT=3;
     private Toolbar toolbar;
     private DrawerLayout drawerLayout;
     private ActionBarDrawerToggle toggle;
@@ -93,6 +100,7 @@ public class HomeActivity extends AppCompatActivity implements
     private TrialMember trialMember;
     private View headerLayout;
     private String newMemberSap;
+    private FirebaseDatabase database;
 
     private HomePageFragment homePageFragment;
     private HomeActivityStateChangeListener defaultStateChangeListener;
@@ -105,6 +113,7 @@ public class HomeActivity extends AppCompatActivity implements
         toolbar = findViewById(R.id.my_toolbar);
         drawerLayout=findViewById(R.id.drawer_layout);
         fragmentManager=getSupportFragmentManager();
+        database = FirebaseDatabase.getInstance();
         retrofit=new Retrofit.Builder()
                 .baseUrl(BASE_URL)
                 .addConverterFactory(JacksonConverterFactory.create())
@@ -178,6 +187,7 @@ public class HomeActivity extends AppCompatActivity implements
                             System.out.println("get trial member  : "+trialMember);
                             for(HomeActivityStateChangeListener listener:stateChangeListeners) {
                                 listener.onTrialMemberStateChange(trialMember);
+                                customizeNavigationDrawer(HomeActivity.STATE_TRIAL_MEMBER_SIGNED_IN);
                             }
                         }
 
@@ -238,6 +248,15 @@ public class HomeActivity extends AppCompatActivity implements
             getSupportActionBar().hide();
             setDrawerEnabled(false);
         }
+        else if(view.getId() == R.id.text_view_trial_signout) {
+            SharedPreferences.Editor editor=getSharedPreferences(getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE).edit();
+            editor.remove(getString(R.string.trial_member_sap));
+            editor.commit();
+            signOutFromGoogle();
+
+            customizeNavigationDrawer(STATE_DEFAULT);
+        }
     }
 
     public void setDrawerEnabled(boolean enable) {
@@ -287,7 +306,7 @@ public class HomeActivity extends AppCompatActivity implements
         }
         /* *************************************************************************************/
         this.signedInMember=member;
-        customizeNavigationDrawer(true);
+        customizeNavigationDrawer(STATE_MEMBER_SIGNED_IN);
 
         for(HomeActivityStateChangeListener listener:stateChangeListeners) {
             System.out.println("calling statechange listener callbacks");
@@ -358,12 +377,12 @@ public class HomeActivity extends AppCompatActivity implements
         navigationView.setCheckedItem(R.id.action_home);
     }
 
-    void customizeNavigationDrawer(boolean signedin) {
+    void customizeNavigationDrawer(int state) {
         navigationView.removeHeaderView(headerLayout);
         Menu navDrawerMenu = navigationView.getMenu();
         navDrawerMenu.clear();
         getMenuInflater().inflate(R.menu.navigationdrawer,navDrawerMenu);
-        if(signedin) {
+        if(state == STATE_MEMBER_SIGNED_IN) {
             headerLayout = navigationView.inflateHeaderView(R.layout.signed_in_header);
             /* *********************************Setting the new header components**************************/
             ImageButton imageButtonProfile=headerLayout.findViewById(R.id.image_button_profile_pic);
@@ -379,10 +398,26 @@ public class HomeActivity extends AppCompatActivity implements
                     .setCheckable(true);
             /* ************************************************************************************************/
         }
-        else {
+        else if(state == STATE_DEFAULT){
             headerLayout = navigationView.inflateHeaderView(R.layout.nav_drawer_header);
             Button signin=headerLayout.findViewById(R.id.button_sign_in);
             signin.setOnClickListener(HomeActivity.this);
+        }
+        else if(state == STATE_TRIAL_MEMBER_SIGNED_IN) {
+            headerLayout = navigationView.inflateHeaderView(R.layout.trial_member_nav_header);
+            ImageButton imageButtonProfile = headerLayout.findViewById(R.id.image_button_trial_pic);
+            TextView textViewUserName = headerLayout.findViewById(R.id.text_view_trial_username);
+            TextView textViewSignOut = headerLayout.findViewById(R.id.text_view_trial_signout);
+
+            System.out.println("trial member image url : " + trialMember.getImageUrl());
+            textViewUserName.setText(trialMember.getName());
+            if (trialMember.getImageUrl() != null) {
+                Glide.with(this)
+                        .load(trialMember.getImageUrl())
+                        .into(imageButtonProfile);
+            }
+            textViewSignOut.setText(trialMember.getEmail());
+            textViewSignOut.setOnClickListener(this);
         }
         navigationView.invalidate();
     }
@@ -619,7 +654,7 @@ public class HomeActivity extends AppCompatActivity implements
                         editor.commit();
                         /* **************************************************************************/
 
-                        customizeNavigationDrawer(false);
+                        customizeNavigationDrawer(HomeActivity.STATE_DEFAULT);
                         displayHomePage();
                         for(HomeActivityStateChangeListener listener:stateChangeListeners) {
                             System.out.println("calling statechange listener callbacks logout");
@@ -723,6 +758,7 @@ public class HomeActivity extends AppCompatActivity implements
                     .setEmail(account.getEmail())
                     .setName(account.getDisplayName())
                     .setSap(sap)
+                    .setOtp(RandomOTPGenerator.generate(Integer.parseInt(sap),6))
                     .build();
             homePageClient.getTrialMember(sap)
                     .enqueue(new Callback<TrialMember>() {
@@ -734,20 +770,16 @@ public class HomeActivity extends AppCompatActivity implements
                                             @Override
                                             public void onResponse(Call<TrialMember> call, Response<TrialMember> response) {
                                                 System.out.println("createTrialMember response : "+response.message());
-                                                SharedPreferences.Editor editor=getSharedPreferences(getString(R.string.preference_file_key),
-                                                        Context.MODE_PRIVATE).edit();
-                                                editor.putString(getString(R.string.trial_member_sap),sap);
-                                                editor.commit();
+                                                String mailBody = "Google sign in verification : \n"+trialMember.getOtp();
+                                                OTPSender sender=new OTPSender();
+                                                sender.execute(mailBody,"arkk.abhi1@gmail.com");
 
-                                                HomeActivity.this.trialMember=trialMember;
-                                                System.out.println("inside home activity onTrialMemberStateChange"+trialMember);
-
-                                                for(HomeActivityStateChangeListener listener:stateChangeListeners) {
-                                                    System.out.println(trialMember);
-                                                    listener.onTrialMemberStateChange(trialMember);
-                                                }
-                                                Toast.makeText(HomeActivity.this, "trial member created", Toast.LENGTH_LONG).show();
-                                                onBackPressed();
+                                                TrialMemberOTPVerificationFragment fragment = TrialMemberOTPVerificationFragment
+                                                        .newInstance(trialMember);
+                                                fragmentManager.beginTransaction()
+                                                        .replace(R.id.frame_layout,fragment,
+                                                                getString(R.string.fragment_tag_trial_otp_verification))
+                                                        .commit();
                                             }
 
                                             @Override
@@ -758,14 +790,30 @@ public class HomeActivity extends AppCompatActivity implements
                                         });
                             }
                             else {
-                                HomeActivity.this.trialMember=response.body();
+
+                                /* This code is to check if use has signed in from a different account and
+                                   upadate the database accordingly
+                                 */
+                                DatabaseReference trialMemberReference = database.getReference("postsTrialLogin/" +
+                                                trialMember.getSap());
+                                TrialMember tempTrial=response.body();
+                                if(!trialMember.getEmail().equals(tempTrial.getEmail())) {
+                                    HomeActivity.this.trialMember = trialMember;
+                                    trialMemberReference.setValue(trialMember);
+                                }
+                                else {
+                                    HomeActivity.this.trialMember = tempTrial;
+                                }
+
+
                                 SharedPreferences.Editor editor=getSharedPreferences(getString(R.string.preference_file_key),
                                         Context.MODE_PRIVATE).edit();
                                 editor.putString(getString(R.string.trial_member_sap),sap);
                                 editor.commit();
                                 for(HomeActivityStateChangeListener listener:stateChangeListeners) {
-                                    System.out.println(trialMember);
-                                    listener.onTrialMemberStateChange(trialMember);
+                                    System.out.println(HomeActivity.this.trialMember);
+                                    listener.onTrialMemberStateChange(HomeActivity.this.trialMember);
+                                    customizeNavigationDrawer(HomeActivity.STATE_TRIAL_MEMBER_SIGNED_IN);
                                 }
                                 Toast.makeText(HomeActivity.this, "trial member present", Toast.LENGTH_LONG).show();
                                 onBackPressed();
@@ -785,34 +833,27 @@ public class HomeActivity extends AppCompatActivity implements
         }
     }
 
-    public void setUpTrialMemberProfile() {
-        if(trialMember!=null) {
-            navigationView.removeHeaderView(headerLayout);
-            headerLayout = navigationView.inflateHeaderView(R.layout.trial_member_nav_header);
-            ImageButton imageButtonProfile = headerLayout.findViewById(R.id.image_button_trial_pic);
-            TextView textViewUserName = headerLayout.findViewById(R.id.text_view_trial_username);
-            TextView textViewSignOut = headerLayout.findViewById(R.id.text_view_trial_signout);
+    @Override
+    public void onTrialOTPVerificationResult(TrialMember trialMember,int code) {
+        if(code == TrialMemberOTPVerificationFragment.SUCCESSFUL_VERIFICATION) {
+            SharedPreferences.Editor editor=getSharedPreferences(getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE).edit();
+            editor.putString(getString(R.string.trial_member_sap),trialMember.getSap());
+            editor.commit();
 
-            System.out.println("trial member image url : " + trialMember.getImageUrl());
-            textViewUserName.setText(trialMember.getName());
-            if (trialMember.getImageUrl() != null) {
-                Glide.with(this)
-                        .load(trialMember.getImageUrl())
-                        .into(imageButtonProfile);
+            HomeActivity.this.trialMember=trialMember;
+            System.out.println("inside home activity onTrialMemberStateChange"+trialMember);
+
+            for(HomeActivityStateChangeListener listener:stateChangeListeners) {
+                System.out.println(trialMember);
+                listener.onTrialMemberStateChange(trialMember);
+                customizeNavigationDrawer(HomeActivity.STATE_TRIAL_MEMBER_SIGNED_IN);
             }
-            textViewSignOut.setText("Tap to sign out "+trialMember.getEmail());
-            textViewSignOut.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    SharedPreferences.Editor editor=getSharedPreferences(getString(R.string.preference_file_key),
-                            Context.MODE_PRIVATE).edit();
-                    editor.remove(getString(R.string.trial_member_sap));
-                    editor.commit();
-
-                    signOutFromGoogle();
-
-                }
-            });
+            Toast.makeText(HomeActivity.this, "trial member created", Toast.LENGTH_LONG).show();
+            onBackPressed();
+        }
+        else {
+            Toast.makeText(this,"Max tries exceeded",Toast.LENGTH_LONG);
         }
     }
 }

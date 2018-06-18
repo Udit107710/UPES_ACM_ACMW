@@ -1,6 +1,7 @@
 package org.upesacm.acmacmw.adapter;
 
 import android.support.annotation.NonNull;
+import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.RecyclerView.OnScrollListener;
@@ -20,6 +21,8 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import org.upesacm.acmacmw.R;
+import org.upesacm.acmacmw.activity.HomeActivity;
+import org.upesacm.acmacmw.fragment.GoogleSignInFragment;
 import org.upesacm.acmacmw.listener.OnLoadMoreListener;
 import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.Post;
@@ -184,6 +187,11 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
                 }
                 else {
                     Toast.makeText(recyclerView.getContext(),"Please log in to like",Toast.LENGTH_LONG).show();
+                    GoogleSignInFragment fragment = new GoogleSignInFragment();
+                    AppCompatActivity activity = (AppCompatActivity)recyclerView.getContext();
+                    activity.getSupportFragmentManager().beginTransaction()
+                            .replace(R.id.frame_layout, fragment,activity.getString(R.string.fragment_tag_google_sign_in))
+                            .commit();
                     System.out.println("like button User not signed in");
                 }
 
