@@ -1,5 +1,8 @@
 package org.upesacm.acmacmw.adapter;
 
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -208,10 +211,34 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
                 }
 
             }
-            else if(view.getId() == R.id.image_button_post_delete){
+            else if(view.getId() == R.id.image_button_post_delete) {
                 System.out.println("deleting post");
-                Post nullPost=new Post();
-                postReference.setValue(nullPost);
+                if (itemView != null) {
+                    final Context context = itemView.getContext();
+                    AlertDialog.Builder alertDialog = new AlertDialog.Builder(context);
+                    alertDialog.setTitle("Delete this Post");
+                    alertDialog.setMessage("Are you Sure ? ");
+                    alertDialog.setPositiveButton("SURE", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            Post nullPost = new Post();
+                            postReference.setValue(nullPost);
+                            Toast.makeText(context,"Deleted Sucessfully",Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                    alertDialog.setNegativeButton("CANCEL", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int which) {
+                            dialog.dismiss();
+                            // DO SOMETHING HERE
+
+                        }
+                    });
+
+                    AlertDialog dialog = alertDialog.create();
+                    dialog.show();
+
+                }
             }
         }
     }
