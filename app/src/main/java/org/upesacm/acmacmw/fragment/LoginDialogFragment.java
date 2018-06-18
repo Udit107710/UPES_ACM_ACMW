@@ -41,7 +41,7 @@ public class LoginDialogFragment extends DialogFragment implements View.OnClickL
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view=inflater.inflate(R.layout.fragment_login_dialog,null);
-        editTextUsername=view.findViewById(R.id.text_view_post_username);
+        editTextUsername=view.findViewById(R.id.edit_text_username);
         editTextPassword=view.findViewById(R.id.editText_password);
         buttonLogin=view.findViewById(R.id.button_login);
         buttonCancel=view.findViewById(R.id.button_cancel);

@@ -9,7 +9,9 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
@@ -89,13 +91,23 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
             shiftingMode.setAccessible(true);
             shiftingMode.setBoolean(menuView, false);
             shiftingMode.setAccessible(false);
+
             for (int i = 0; i < menuView.getChildCount(); i++) {
                 BottomNavigationItemView item = (BottomNavigationItemView) menuView.getChildAt(i);
                 //noinspection RestrictedApi
                 item.setShiftingMode(false);
+                //icons at centre
+                item.setPadding(0, 20, 0, 0);
                 // set once again checked value, so view will be updated
                 //noinspection RestrictedApi
                 item.setChecked(item.getItemData().isChecked());
+                //increasing icon size
+                final View iconView = menuView.getChildAt(i).findViewById(android.support.design.R.id.icon);
+                final ViewGroup.LayoutParams layoutParams = iconView.getLayoutParams();
+                final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+                layoutParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, displayMetrics);
+                layoutParams.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, displayMetrics);
+                iconView.setLayoutParams(layoutParams);
             }
         } catch (NoSuchFieldException e) {
             Log.e("BNVHelper", "Unable to get shift mode field", e);
