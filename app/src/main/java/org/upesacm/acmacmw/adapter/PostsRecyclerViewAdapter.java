@@ -74,6 +74,23 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
         if(holder instanceof PostViewHolder) {
             Post post=posts.get(position);
             ((PostViewHolder) holder).bindData(post);
+
+            if(signedInMember != null || trialMember!=null) {
+                boolean previouslyLiked = false;
+
+                String signedInUserSap = (signedInMember == null) ? trialMember.getSap() : signedInMember.getSap();
+                for (String ownerSapId : post.getLikesIds()) {
+                    if (ownerSapId.equals(signedInUserSap)) {
+                        previouslyLiked = true;
+                        break;
+                    }
+                }
+                if (previouslyLiked) {
+                    ((PostViewHolder) holder).imageButtonLike.setImageResource(R.drawable.ic_thumb_up_blue_24dp);
+                } else {
+                    ((PostViewHolder) holder).imageButtonLike.setImageResource(R.drawable.like);
+                }
+            }
         }
     }
 
@@ -171,12 +188,15 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
                         System.out.println("member id : " + ownerSapId);
                         if (ownerSapId.equals(signedInUserSap)) {
                             previouslyLiked = true;
+
                             break;
                         }
                         pos++;
+                        imageButtonLike.setImageResource(R.drawable.ic_thumb_up_blue_24dp);
                     }
-                    if (previouslyLiked)
+                    if (previouslyLiked){
                         post.getLikesIds().remove(pos);
+                        imageButtonLike.setImageResource(R.drawable.like);}
                     else
                         post.getLikesIds().add(signedInUserSap);
                     textViewLikeCount.setText(String.valueOf(post.getLikesIds().size()));
