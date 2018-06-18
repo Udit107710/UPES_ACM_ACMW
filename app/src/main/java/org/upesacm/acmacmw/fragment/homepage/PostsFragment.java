@@ -421,8 +421,8 @@ public class PostsFragment extends Fragment
 
 
     @Override
-    public void onMemberLogin(@NonNull Member signedInMember) {
-        System.out.println("postfragment onMemberLogin : "+signedInMember);
+    public void onSignedInMemberStateChange(@NonNull Member signedInMember) {
+        System.out.println("postfragment onSignedInMemberStateChange : "+signedInMember);
         this.signedInMember=signedInMember;
         recyclerViewAdapter.setSignedInMember(signedInMember);
     }
@@ -435,7 +435,7 @@ public class PostsFragment extends Fragment
     }
 
     @Override
-    public void onGoogleSignIn(TrialMember trialMember) {
+    public void onTrialMemberStateChange(TrialMember trialMember) {
         System.out.println("post fragment on google sign in callback called"+trialMember);
         this.trialMember=trialMember;
         recyclerViewAdapter.setTrialMember(trialMember);

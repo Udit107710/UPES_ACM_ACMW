@@ -5,6 +5,11 @@ public class TrialMember {
     private String email;
     private String name;
     private String creationTimeStamp;
+    private String imageUrl;
+
+    public String getImageUrl() {
+        return imageUrl;
+    }
 
     public String getSap() {
         return sap;
@@ -27,6 +32,7 @@ public class TrialMember {
         private String email;
         private String name;
         private String timeStamp;
+        private String imageUrl;
         public Builder(String timeStamp) {
             this.timeStamp=timeStamp;
         }
@@ -36,6 +42,7 @@ public class TrialMember {
             trialMember.sap=sap;
             trialMember.name=name;
             trialMember.creationTimeStamp=timeStamp;
+            trialMember.imageUrl=imageUrl;
             System.out.println("trial member time stamp : "+trialMember.getCreationTimeStamp());
             return trialMember;
         }
@@ -52,6 +59,11 @@ public class TrialMember {
 
         public Builder setEmail(String email) {
             this.email=email;
+            return this;
+        }
+
+        public Builder setImageUrl(String imageUrl) {
+            this.imageUrl=imageUrl;
             return this;
         }
     }

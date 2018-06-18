@@ -4,8 +4,8 @@ import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.TrialMember;
 
 public interface HomeActivityStateChangeListener {
-    void onMemberLogin(Member member);
+    void onSignedInMemberStateChange(Member member);
     void onMemberLogout();
-    void onGoogleSignIn(TrialMember member);
+    void onTrialMemberStateChange(TrialMember member);
     void onGoogleSignOut();
 }

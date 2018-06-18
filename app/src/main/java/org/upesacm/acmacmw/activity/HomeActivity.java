@@ -23,6 +23,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.bumptech.glide.Glide;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -113,8 +114,8 @@ public class HomeActivity extends AppCompatActivity implements
         navigationView=findViewById(R.id.nav_view);
         defaultStateChangeListener = new HomeActivityStateChangeListener() {
             @Override
-            public void onMemberLogin(Member member) {
-                System.out.println("Default onMemberLogin");
+            public void onSignedInMemberStateChange(Member member) {
+                System.out.println("Default onSignedInMemberStateChange");
             }
 
             @Override
@@ -123,7 +124,7 @@ public class HomeActivity extends AppCompatActivity implements
             }
 
             @Override
-            public void onGoogleSignIn(TrialMember member) {
+            public void onTrialMemberStateChange(TrialMember member) {
                 System.out.println("Default onMemberLogout google sign in");
             }
 
@@ -176,7 +177,7 @@ public class HomeActivity extends AppCompatActivity implements
                             trialMember = response.body();
                             System.out.println("get trial member  : "+trialMember);
                             for(HomeActivityStateChangeListener listener:stateChangeListeners) {
-                                listener.onGoogleSignIn(trialMember);
+                                listener.onTrialMemberStateChange(trialMember);
                             }
                         }
 
@@ -290,7 +291,7 @@ public class HomeActivity extends AppCompatActivity implements
 
         for(HomeActivityStateChangeListener listener:stateChangeListeners) {
             System.out.println("calling statechange listener callbacks");
-            listener.onMemberLogin(signedInMember);
+            listener.onSignedInMemberStateChange(signedInMember);
         }
     }
 
@@ -390,8 +391,8 @@ public class HomeActivity extends AppCompatActivity implements
         System.out.println("addOnHomeActivityStateChangeListener");
         stateChangeListeners.add(listener);
         //call the listener once after intially adding it
-        listener.onMemberLogin(signedInMember);
-        listener.onGoogleSignIn(trialMember);
+        listener.onSignedInMemberStateChange(signedInMember);
+        listener.onTrialMemberStateChange(trialMember);
     }
 
     void signOutFromGoogle() {
@@ -739,11 +740,11 @@ public class HomeActivity extends AppCompatActivity implements
                                                 editor.commit();
 
                                                 HomeActivity.this.trialMember=trialMember;
-                                                System.out.println("inside home activity onGoogleSignIn"+trialMember);
+                                                System.out.println("inside home activity onTrialMemberStateChange"+trialMember);
 
                                                 for(HomeActivityStateChangeListener listener:stateChangeListeners) {
                                                     System.out.println(trialMember);
-                                                    listener.onGoogleSignIn(trialMember);
+                                                    listener.onTrialMemberStateChange(trialMember);
                                                 }
                                                 Toast.makeText(HomeActivity.this, "trial member created", Toast.LENGTH_LONG).show();
                                                 onBackPressed();
@@ -758,9 +759,13 @@ public class HomeActivity extends AppCompatActivity implements
                             }
                             else {
                                 HomeActivity.this.trialMember=response.body();
+                                SharedPreferences.Editor editor=getSharedPreferences(getString(R.string.preference_file_key),
+                                        Context.MODE_PRIVATE).edit();
+                                editor.putString(getString(R.string.trial_member_sap),sap);
+                                editor.commit();
                                 for(HomeActivityStateChangeListener listener:stateChangeListeners) {
                                     System.out.println(trialMember);
-                                    listener.onGoogleSignIn(trialMember);
+                                    listener.onTrialMemberStateChange(trialMember);
                                 }
                                 Toast.makeText(HomeActivity.this, "trial member present", Toast.LENGTH_LONG).show();
                                 onBackPressed();
@@ -777,6 +782,37 @@ public class HomeActivity extends AppCompatActivity implements
         }
         else {
             Toast.makeText(this, "unable to sign in", Toast.LENGTH_LONG).show();
+        }
+    }
+
+    public void setUpTrialMemberProfile() {
+        if(trialMember!=null) {
+            navigationView.removeHeaderView(headerLayout);
+            headerLayout = navigationView.inflateHeaderView(R.layout.trial_member_nav_header);
+            ImageButton imageButtonProfile = headerLayout.findViewById(R.id.image_button_trial_pic);
+            TextView textViewUserName = headerLayout.findViewById(R.id.text_view_trial_username);
+            TextView textViewSignOut = headerLayout.findViewById(R.id.text_view_trial_signout);
+
+            System.out.println("trial member image url : " + trialMember.getImageUrl());
+            textViewUserName.setText(trialMember.getName());
+            if (trialMember.getImageUrl() != null) {
+                Glide.with(this)
+                        .load(trialMember.getImageUrl())
+                        .into(imageButtonProfile);
+            }
+            textViewSignOut.setText("Tap to sign out "+trialMember.getEmail());
+            textViewSignOut.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    SharedPreferences.Editor editor=getSharedPreferences(getString(R.string.preference_file_key),
+                            Context.MODE_PRIVATE).edit();
+                    editor.remove(getString(R.string.trial_member_sap));
+                    editor.commit();
+
+                    signOutFromGoogle();
+
+                }
+            });
         }
     }
 }
