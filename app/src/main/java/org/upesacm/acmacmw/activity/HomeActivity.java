@@ -442,6 +442,7 @@ public class HomeActivity extends AppCompatActivity implements
                     public void onSuccess(Void aVoid) {
                         Toast.makeText(HomeActivity.this,"Signed out from Google",Toast.LENGTH_SHORT)
                                 .show();
+                        HomeActivity.this.trialMember=null;
                         for(HomeActivityStateChangeListener listener:stateChangeListeners) {
                             System.out.println("calling state change listeners onGoogleSignout");
                             listener.onGoogleSignOut();
