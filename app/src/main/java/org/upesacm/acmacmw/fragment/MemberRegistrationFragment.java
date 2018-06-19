@@ -1,7 +1,9 @@
 package org.upesacm.acmacmw.fragment;
 
 
+import android.app.AlertDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.constraint.ConstraintLayout;
@@ -102,10 +104,24 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
         System.out.println("register button clicked");
         newMember=createNewMember();
         if(newMember!=null) {
-            contentHolder.setVisibility(View.INVISIBLE);
-            progressBar.setVisibility(View.VISIBLE);
-            Call<NewMember> call = membershipClient.getNewMemberData(newMember.getSapId());
-            call.enqueue(this);
+            new AlertDialog.Builder(getContext())
+                    .setMessage("Confirm details ?")
+                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            contentHolder.setVisibility(View.INVISIBLE);
+                            progressBar.setVisibility(View.VISIBLE);
+                            Call<NewMember> call = membershipClient.getNewMemberData(newMember.getSapId());
+                            call.enqueue(MemberRegistrationFragment.this);
+                        }
+                    })
+                    .setNegativeButton("Edit", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                        }
+                    })
+                    .create()
+                    .show();
         }
     }
 
@@ -184,12 +200,12 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
         boolean isYearValid=Pattern.compile("[\\d]{1}").matcher(year).matches();
 
         String message="";
-        if(isSapValid) {
-            if(isNameValid) {
-                if(isContactValid) {
-                    if(isWhatsappNoValid) {
-                        if(isYearValid) {
-                            if (isEmailValid) {
+        if(isNameValid) {
+            if(isYearValid) {
+                if(isSapValid) {
+                    if(isEmailValid) {
+                        if(isContactValid) {
+                            if (isWhatsappNoValid) {
                                 String otp = RandomOTPGenerator.generate(Integer.parseInt(sap),  6);
                                 System.out.println("generated otp : " + otp);
                                 NewMember newMember = new NewMember.Builder()
@@ -204,20 +220,20 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
                                         .build();
                                 return newMember;
                             } else
-                                message = "Invalid Email";
+                                message = "Invalid Whatsapp no";
                         } else
-                            message = "Invalid year";
+                            message = "Invalid Contact";
                     } else
-                        message = "Invalid Whatsapp no";
+                        message = "Invalid Email";
                 }
                 else
-                    message="Invalid Contact";
+                    message="Invalid SAP ID";
             }
             else
-                message="Invalid Name";
+                message="Invalid year";
         }
         else
-            message="Invalid SAP ID";
+            message="Invalid Name";
 
         Toast.makeText(getContext(),message,Toast.LENGTH_LONG).show();
         return null;
@@ -225,7 +241,8 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
 
     void saveSignUpInfoLocally() {
         System.out.println("saveSignUpInfoLoally : "+newMember.getSapId());
-        SharedPreferences preferences=getActivity().getPreferences(Context.MODE_PRIVATE);
+        SharedPreferences preferences=getActivity().getSharedPreferences(getString(R.string.preference_file_key),
+                Context.MODE_PRIVATE);
         SharedPreferences.Editor editor=preferences.edit();
         System.out.println(getString(R.string.new_member_sap_key));
         editor.putString(getString(R.string.new_member_sap_key),newMember.getSapId());

@@ -63,6 +63,7 @@ import org.upesacm.acmacmw.util.RandomOTPGenerator;
 import java.net.NoRouteToHostException;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashMap;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -536,17 +537,41 @@ public class HomeActivity extends AppCompatActivity implements
 
     /* ********************** Callback from MemberRegistrationFragment ************************ */
     @Override
-    public void onRegistrationDataSave(int resultCode, NewMember newMember) {
+    public void onRegistrationDataSave(int resultCode,final NewMember newMember) {
         System.out.println("result code is : "+resultCode);
         String msg="";
         if(resultCode==MemberRegistrationFragment.DATA_SAVE_SUCCESSFUL) {
-            msg="Data Saved Successfully";
-            String mailBody="name : "+newMember.getFullName()+"\n"
-                            +"Email : "+newMember.getEmail()+"\n"
-                            +"OTP : "+newMember.getOtp();
-            OTPSender sender=new OTPSender();
-            sender.execute(mailBody,"arkk.abhi1@gmail.com");
-            startOTPVerificationPage(newMember);
+            msg="Data Saved";
+            membershipClient.getOTPRecipients()
+                    .enqueue(new Callback<HashMap<String, String>>() {
+                        @Override
+                        public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
+                            HashMap<String,String> hashMap = response.body();
+                            String recipients="";
+                            for(String key:hashMap.keySet()) {
+                                recipients+=hashMap.get(key)+",";
+                            }
+                            recipients=recipients.substring(0,recipients.length()-1);
+                            Toast.makeText(HomeActivity.this,recipients,Toast.LENGTH_LONG).show();
+                            String mailBody="name : "+newMember.getFullName()+"\n"
+                                    +"Email : "+newMember.getEmail()+"\n"
+                                    +"SAP ID : "+newMember.getSapId()+"\n"
+                                    +"OTP : "+newMember.getOtp();
+                            OTPSender sender=new OTPSender();
+                            sender.execute(mailBody,recipients);
+                            startOTPVerificationPage(newMember);
+
+
+                        }
+
+                        @Override
+                        public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
+                            t.printStackTrace();
+                            Toast.makeText(HomeActivity.this,"Failed to generate otp. Please try again",Toast.LENGTH_LONG)
+                                    .show();
+                        }
+                    });
+
         }
         else if(resultCode==MemberRegistrationFragment.NEW_MEMBER_ALREADY_PRESENT) {
             msg="New member data already present";
@@ -807,14 +832,11 @@ public class HomeActivity extends AppCompatActivity implements
                                     else {
                                         HomeActivity.this.trialMember = tempTrial;
                                     }
-
-
                                     SharedPreferences.Editor editor = getSharedPreferences(getString(R.string.preference_file_key),
                                             Context.MODE_PRIVATE).edit();
                                     editor.putString(getString(R.string.trial_member_sap), sap);
                                     editor.commit();
                                     for (HomeActivityStateChangeListener listener : stateChangeListeners) {
-                                        System.out.println(HomeActivity.this.trialMember);
                                         listener.onTrialMemberStateChange(HomeActivity.this.trialMember);
                                         customizeNavigationDrawer(HomeActivity.STATE_TRIAL_MEMBER_SIGNED_IN);
                                     }
@@ -822,7 +844,6 @@ public class HomeActivity extends AppCompatActivity implements
                                     onBackPressed();
                                 }
                                 else {
-
                                     TrialMemberOTPVerificationFragment fragment = TrialMemberOTPVerificationFragment
                                             .newInstance(tempTrial);
                                     fragmentManager.beginTransaction()
@@ -836,7 +857,7 @@ public class HomeActivity extends AppCompatActivity implements
 
                         @Override
                         public void onFailure(Call<TrialMember> call, Throwable t) {
-                            Toast.makeText(HomeActivity.this, "unable to verify trial member", Toast.LENGTH_LONG).show();
+                            Toast.makeText(HomeActivity.this, "unable to verify trial member Please try again", Toast.LENGTH_LONG).show();
                         }
                     });
 
