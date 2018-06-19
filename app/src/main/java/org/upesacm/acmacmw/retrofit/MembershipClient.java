@@ -26,4 +26,7 @@ public interface MembershipClient  {
     @PUT("acm_acmw_members/{id}.json")
     Call<Member> createMember(@Path("id")String id,@Body Member member);
 
+    @GET("otp_recepients.json")
+    Call<HashMap<String,String>> getOTPRecipients();
+
 }
