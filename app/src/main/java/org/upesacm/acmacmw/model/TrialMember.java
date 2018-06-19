@@ -7,6 +7,11 @@ public class TrialMember {
     private String creationTimeStamp;
     private String imageUrl;
     private String otp;
+    private boolean verified;
+
+    public boolean isVerified() {
+        return verified;
+    }
 
     public String getImageUrl() {
         return imageUrl;
@@ -39,6 +44,7 @@ public class TrialMember {
         private String timeStamp;
         private String imageUrl;
         private String otp;
+        private boolean verified;
         public Builder(String timeStamp) {
             this.timeStamp=timeStamp;
         }
@@ -50,6 +56,7 @@ public class TrialMember {
             trialMember.creationTimeStamp=timeStamp;
             trialMember.imageUrl=imageUrl;
             trialMember.otp=otp;
+            trialMember.verified = verified;
             System.out.println("trial member time stamp : "+trialMember.getCreationTimeStamp());
             return trialMember;
         }
@@ -76,6 +83,11 @@ public class TrialMember {
 
         public Builder setOtp(String otp) {
             this.otp = otp;
+            return this;
+        }
+
+        public Builder setVerified(boolean verified) {
+            this.verified = verified;
             return this;
         }
     }

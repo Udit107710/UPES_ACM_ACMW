@@ -72,6 +72,16 @@ public class TrialMemberOTPVerificationFragment extends Fragment
         tries++;
         otp = editTextOTP.getText().toString();
         if(otp.equals(trialMember.getOtp())) {
+            TrialMember tempTrial = new TrialMember.Builder(trialMember.getCreationTimeStamp())
+                    .setEmail(trialMember.getEmail())
+                    .setImageUrl(trialMember.getImageUrl())
+                    .setName(trialMember.getName())
+                    .setOtp(trialMember.getOtp())
+                    .setSap(trialMember.getSap())
+                    .setVerified(true)
+                    .build();
+
+            trialMember = tempTrial;
             listener.onTrialOTPVerificationResult(trialMember,SUCCESSFUL_VERIFICATION);
         }
         else if(tries<5) {

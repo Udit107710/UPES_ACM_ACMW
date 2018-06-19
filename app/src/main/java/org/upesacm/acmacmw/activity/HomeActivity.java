@@ -254,7 +254,7 @@ public class HomeActivity extends AppCompatActivity implements
             editor.remove(getString(R.string.trial_member_sap));
             editor.commit();
             signOutFromGoogle();
-
+            drawerLayout.closeDrawer(GravityCompat.START);
             customizeNavigationDrawer(STATE_DEFAULT);
         }
     }
@@ -439,6 +439,8 @@ public class HomeActivity extends AppCompatActivity implements
                 .addOnSuccessListener(new OnSuccessListener<Void>() {
                     @Override
                     public void onSuccess(Void aVoid) {
+                        Toast.makeText(HomeActivity.this,"Signed out from Google",Toast.LENGTH_SHORT)
+                                .show();
                         for(HomeActivityStateChangeListener listener:stateChangeListeners) {
                             System.out.println("calling state change listeners onGoogleSignout");
                             listener.onGoogleSignOut();
@@ -797,26 +799,37 @@ public class HomeActivity extends AppCompatActivity implements
                                 DatabaseReference trialMemberReference = database.getReference("postsTrialLogin/" +
                                                 trialMember.getSap());
                                 TrialMember tempTrial=response.body();
-                                if(!trialMember.getEmail().equals(tempTrial.getEmail())) {
-                                    HomeActivity.this.trialMember = trialMember;
-                                    trialMemberReference.setValue(trialMember);
+                                if(tempTrial.isVerified()) {
+                                    if (!trialMember.getEmail().equals(tempTrial.getEmail())) {
+                                        HomeActivity.this.trialMember = trialMember;
+                                        trialMemberReference.setValue(trialMember);
+                                    }
+                                    else {
+                                        HomeActivity.this.trialMember = tempTrial;
+                                    }
+
+
+                                    SharedPreferences.Editor editor = getSharedPreferences(getString(R.string.preference_file_key),
+                                            Context.MODE_PRIVATE).edit();
+                                    editor.putString(getString(R.string.trial_member_sap), sap);
+                                    editor.commit();
+                                    for (HomeActivityStateChangeListener listener : stateChangeListeners) {
+                                        System.out.println(HomeActivity.this.trialMember);
+                                        listener.onTrialMemberStateChange(HomeActivity.this.trialMember);
+                                        customizeNavigationDrawer(HomeActivity.STATE_TRIAL_MEMBER_SIGNED_IN);
+                                    }
+                                    Toast.makeText(HomeActivity.this, "trial member present", Toast.LENGTH_LONG).show();
+                                    onBackPressed();
                                 }
                                 else {
-                                    HomeActivity.this.trialMember = tempTrial;
-                                }
 
-
-                                SharedPreferences.Editor editor=getSharedPreferences(getString(R.string.preference_file_key),
-                                        Context.MODE_PRIVATE).edit();
-                                editor.putString(getString(R.string.trial_member_sap),sap);
-                                editor.commit();
-                                for(HomeActivityStateChangeListener listener:stateChangeListeners) {
-                                    System.out.println(HomeActivity.this.trialMember);
-                                    listener.onTrialMemberStateChange(HomeActivity.this.trialMember);
-                                    customizeNavigationDrawer(HomeActivity.STATE_TRIAL_MEMBER_SIGNED_IN);
+                                    TrialMemberOTPVerificationFragment fragment = TrialMemberOTPVerificationFragment
+                                            .newInstance(tempTrial);
+                                    fragmentManager.beginTransaction()
+                                            .replace(R.id.frame_layout,fragment,
+                                                    getString(R.string.fragment_tag_trial_otp_verification))
+                                            .commit();
                                 }
-                                Toast.makeText(HomeActivity.this, "trial member present", Toast.LENGTH_LONG).show();
-                                onBackPressed();
                             }
 
                         }
@@ -842,8 +855,12 @@ public class HomeActivity extends AppCompatActivity implements
             editor.commit();
 
             HomeActivity.this.trialMember=trialMember;
-            System.out.println("inside home activity onTrialMemberStateChange"+trialMember);
+            DatabaseReference trialMemberReference = database.getReference("postsTrialLogin/" +
+                    trialMember.getSap());
+            trialMemberReference.setValue(trialMember);
 
+            System.out.println("inside home activity onTrialMemberStateChange"+trialMember);
+            System.out.println(trialMember.getName()+trialMember.getEmail());
             for(HomeActivityStateChangeListener listener:stateChangeListeners) {
                 System.out.println(trialMember);
                 listener.onTrialMemberStateChange(trialMember);

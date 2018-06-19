@@ -52,8 +52,6 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
                                     FirebaseDatabase database) {
         this.recyclerView=recyclerView;
         this.homePageClient = homePageClient;
-        this.signedInMember = signedInMember;
-        this.trialMember = trialMember;
         this.database=database;
         addOnScrollListener();
     }
