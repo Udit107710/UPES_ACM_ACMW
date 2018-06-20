@@ -1,5 +1,6 @@
 package org.upesacm.acmacmw.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -91,6 +92,7 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
         super.onResume();
     }
 
+    @SuppressLint("RestrictedApi")
     void disableShiftMode(BottomNavigationView view) {
         BottomNavigationMenuView menuView = (BottomNavigationMenuView) view.getChildAt(0);
         try {
@@ -139,7 +141,7 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
             ft.commit();
         }
         else if(item.getItemId() == R.id.action_heirarchy) {
-            HierarchyFragment hierarchyFragment = HierarchyFragment.newInstance(database);
+            HierarchyFragment hierarchyFragment = new HierarchyFragment();
             FragmentTransaction ft=childFm.beginTransaction();
             userSelectedFragment = hierarchyFragment;
             ft.replace(R.id.frameLayout_homepage,userSelectedFragment);
