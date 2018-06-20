@@ -85,7 +85,7 @@
         android:layout_marginTop="10dp"
         android:ems="10"
         android:hint="Password"
-        android:drawableStart="@drawable/ic_person_black_24dp"
+        android:drawableStart="@drawable/ic_security_black_24dp"
         android:inputType="textPersonName|textPassword"
         android:textAlignment="viewStart"
         android:textSize="16sp"

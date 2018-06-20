@@ -31,13 +31,8 @@ import retrofit2.Callback;
 import retrofit2.Response;
 
 
-public class MemberRegistrationFragment extends Fragment implements View.OnClickListener,
-                         Callback<NewMember>{
+public class MemberRegistrationFragment extends Fragment implements View.OnClickListener {
 
-    public static final int NEW_MEMBER_ALREADY_PRESENT=1;
-    public static final int DATA_SAVE_SUCCESSFUL=2;
-    public static final int DATA_SAVE_FAILED=3;
-    public static final int ALREADY_PART_OF_ACM=4;
 
     MembershipClient membershipClient;
     Toolbar toolbar;
@@ -111,8 +106,10 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
                         public void onClick(DialogInterface dialogInterface, int i) {
                             contentHolder.setVisibility(View.INVISIBLE);
                             progressBar.setVisibility(View.VISIBLE);
-                            Call<NewMember> call = membershipClient.getNewMemberData(newMember.getSapId());
-                            call.enqueue(MemberRegistrationFragment.this);
+                            resultListener.onRegistrationDataAvailable(newMember);
+                           /* Call<NewMember> call = membershipClient.getNewMemberData(newMember.getSapId());
+                            call.enqueue(MemberRegistrationFragment.this); */
+                           resetRegistrationPage();
                         }
                     })
                     .setNegativeButton("Edit", new DialogInterface.OnClickListener() {
@@ -125,61 +122,61 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
         }
     }
 
-    @Override
-    public void onResponse(Call<NewMember> call, Response<NewMember> response) {
-        NewMember nm=response.body();
-        if(nm==null) {
-            Call<Member> memberCall=membershipClient.getMember(newMember.getSapId());
-            memberCall.enqueue(new Callback<Member>() {
-                @Override
-                public void onResponse(Call<Member> call, Response<Member> response) {
-                    if(response.body()==null) {
-                        membershipClient.saveNewMemberData(newMember.getSapId(), newMember)
-                                .enqueue(new Callback<NewMember>() {
-                                    @Override
-                                    public void onResponse(Call<NewMember> call, Response<NewMember> response) {
-                                        if(response.code()==200) {
-                                            //MemberRegistrationFragment.this.saveSignUpInfoLocally();
-                                            resultListener.onRegistrationDataSave(DATA_SAVE_SUCCESSFUL,newMember);
-                                            resetRegistrationPage();
-                                        }
-                                        else {
-                                            resultListener.onRegistrationDataSave(DATA_SAVE_FAILED, newMember);
-                                            resetRegistrationPage();
-                                        }
-                                    }
-                                    @Override
-                                    public void onFailure(Call<NewMember> call, Throwable t) {
-                                        resultListener.onRegistrationDataSave(DATA_SAVE_FAILED,newMember);
-                                        resetRegistrationPage();
-                                    }
-                                });
-                    }
-                    else {
-                        resultListener.onRegistrationDataSave(ALREADY_PART_OF_ACM,newMember);
-                        resetRegistrationPage();
-                    }
-                }
-
-                @Override
-                public void onFailure(Call<Member> call, Throwable t) {
-                    Toast.makeText(MemberRegistrationFragment.this.getContext(),"Failed",Toast.LENGTH_SHORT);
-                    resultListener.onRegistrationDataSave(DATA_SAVE_FAILED,newMember);
-                }
-            });
-        }
-        else {
-            resetRegistrationPage();
-            resultListener.onRegistrationDataSave(NEW_MEMBER_ALREADY_PRESENT,newMember);
-        }
-    }
-
-    @Override
-    public void onFailure(Call<NewMember> call, Throwable t) {
-        System.out.println("Failed to authenticate");
-        resetRegistrationPage();
-        resultListener.onRegistrationDataSave(DATA_SAVE_FAILED,newMember);
-    }
+//    @Override
+//    public void onResponse(Call<NewMember> call, Response<NewMember> response) {
+//        NewMember nm=response.body();
+//        if(nm==null) {
+//            Call<Member> memberCall=membershipClient.getMember(newMember.getSapId());
+//            memberCall.enqueue(new Callback<Member>() {
+//                @Override
+//                public void onResponse(Call<Member> call, Response<Member> response) {
+//                    if(response.body()==null) {
+//                        membershipClient.saveNewMemberData(newMember.getSapId(), newMember)
+//                                .enqueue(new Callback<NewMember>() {
+//                                    @Override
+//                                    public void onResponse(Call<NewMember> call, Response<NewMember> response) {
+//                                        if(response.code()==200) {
+//                                            //MemberRegistrationFragment.this.saveSignUpInfoLocally();
+//                                            resultListener.onRegistrationDataSave(DATA_SAVE_SUCCESSFUL,newMember);
+//                                            resetRegistrationPage();
+//                                        }
+//                                        else {
+//                                            resultListener.onRegistrationDataSave(DATA_SAVE_FAILED, newMember);
+//                                            resetRegistrationPage();
+//                                        }
+//                                    }
+//                                    @Override
+//                                    public void onFailure(Call<NewMember> call, Throwable t) {
+//                                        resultListener.onRegistrationDataSave(DATA_SAVE_FAILED,newMember);
+//                                        resetRegistrationPage();
+//                                    }
+//                                });
+//                    }
+//                    else {
+//                        resultListener.onRegistrationDataSave(ALREADY_PART_OF_ACM,newMember);
+//                        resetRegistrationPage();
+//                    }
+//                }
+//
+//                @Override
+//                public void onFailure(Call<Member> call, Throwable t) {
+//                    Toast.makeText(MemberRegistrationFragment.this.getContext(),"Failed",Toast.LENGTH_SHORT);
+//                    resultListener.onRegistrationDataSave(DATA_SAVE_FAILED,newMember);
+//                }
+//            });
+//        }
+//        else {
+//            resetRegistrationPage();
+//            resultListener.onRegistrationDataSave(NEW_MEMBER_ALREADY_PRESENT,newMember);
+//        }
+//    }
+//
+//    @Override
+//    public void onFailure(Call<NewMember> call, Throwable t) {
+//        System.out.println("Failed to authenticate");
+//        resetRegistrationPage();
+//        resultListener.onRegistrationDataSave(DATA_SAVE_FAILED,newMember);
+//    }
 
     public NewMember createNewMember() {
         String sap=editTextSap.getText().toString().trim();
@@ -264,6 +261,6 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
     }
 
     public interface RegistrationResultListener {
-        public void onRegistrationDataSave(int resultCode,NewMember newMember);
+        void onRegistrationDataAvailable(NewMember newMember);
     }
 }

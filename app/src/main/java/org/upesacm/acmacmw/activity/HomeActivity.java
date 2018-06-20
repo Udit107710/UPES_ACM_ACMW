@@ -3,6 +3,7 @@ package org.upesacm.acmacmw.activity;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
 import android.support.annotation.NonNull;
 import android.support.design.widget.NavigationView;
 import android.support.v4.app.Fragment;
@@ -15,6 +16,7 @@ import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.Toolbar;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -58,6 +60,7 @@ import org.upesacm.acmacmw.model.NewMember;
 import org.upesacm.acmacmw.model.TrialMember;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 import org.upesacm.acmacmw.retrofit.MembershipClient;
+import org.upesacm.acmacmw.util.LayoutToBitmapConvertor;
 import org.upesacm.acmacmw.util.MemberIDGenerator;
 import org.upesacm.acmacmw.util.RandomOTPGenerator;
 
@@ -553,44 +556,47 @@ public class HomeActivity extends AppCompatActivity implements
     /* $$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$ */
 
 
-
     @Override
-    public void onRecepientSelect(String recipientSap,NewMember newMember) {
-        String recipientEmail = recipientSap+"@stu.upes.ac.in";
-        Toast.makeText(HomeActivity.this,recipientEmail,Toast.LENGTH_LONG).show();
-        String mailBody="name : "+newMember.getFullName()+"\n"
-                +"Email : "+newMember.getEmail()+"\n"
-                +"SAP ID : "+newMember.getSapId()+"\n"
-                +"OTP : "+newMember.getOtp();
-        OTPSender sender=new OTPSender();
-        sender.execute(mailBody,recipientEmail);
+    public void onNewMemberDataSave(int resultCode,NewMember newMember) {
+        System.out.println("result code is : "+resultCode);
+        String msg="";
+        if(resultCode==RecipientsFragment.DATA_SAVE_SUCCESSFUL) {
+            msg="Data Saved";
+            String recipientEmail = newMember.getRecipientSap()+"@stu.upes.ac.in";
+            Toast.makeText(HomeActivity.this,recipientEmail,Toast.LENGTH_LONG).show();
+            String mailBody="Name : "+newMember.getFullName()+"\n"
+                    +"Email  : "+newMember.getEmail()+"\n"
+                    +"SAP ID : "+newMember.getSapId()+"\n"
+                    +"OTP    : "+newMember.getOtp();
+            OTPSender sender=new OTPSender();
+            sender.execute(mailBody,recipientEmail,"OTP Details");
+            startOTPVerificationPage(newMember);
+        }
+        else {
+            if (resultCode == RecipientsFragment.NEW_MEMBER_ALREADY_PRESENT) {
+                msg = "New member data already present";
+            } else if (resultCode == RecipientsFragment.ALREADY_PART_OF_ACM) {
+                msg = "Alread a part of ACM";
+            } else
+                msg = "Data save Failed. Please check your connection";
+            fragmentManager.beginTransaction()
+                    .replace(R.id.frame_layout,MemberRegistrationFragment.newInstance(membershipClient,
+                            toolbar),getString(R.string.fragment_tag_new_member_registration))
+                    .commit();
+        }
 
-        startOTPVerificationPage(newMember);
+        Toast.makeText(this,msg,Toast.LENGTH_SHORT).show();
     }
 
     /* ********************** Callback from MemberRegistrationFragment ************************ */
     @Override
-    public void onRegistrationDataSave(int resultCode,final NewMember newMember) {
-        System.out.println("result code is : "+resultCode);
-        String msg="";
-        if(resultCode==MemberRegistrationFragment.DATA_SAVE_SUCCESSFUL) {
-            msg="Data Saved";
-            RecipientsFragment fragment = RecipientsFragment.newInstance(database,membershipClient,
-                    newMember);
-            fragmentManager.beginTransaction()
-                    .replace(R.id.frame_layout,fragment,getString(R.string.fragment_tag_recipients))
-                    .commit();
-        }
-        else if(resultCode==MemberRegistrationFragment.NEW_MEMBER_ALREADY_PRESENT) {
-            msg="New member data already present";
-        }
-        else if(resultCode==MemberRegistrationFragment.ALREADY_PART_OF_ACM) {
-            msg="Alread a part of ACM";
-        }
-        else
-            msg="Data save Failed. Please check your connection";
+    public void onRegistrationDataAvailable(final NewMember newMember) {
+        RecipientsFragment fragment = RecipientsFragment.newInstance(database,membershipClient,
+                newMember);
+        fragmentManager.beginTransaction()
+                .replace(R.id.frame_layout,fragment,getString(R.string.fragment_tag_recipients))
+                .commit();
 
-        Toast.makeText(this,msg,Toast.LENGTH_SHORT).show();
     }
 
     /* ******************************************************************************************/
@@ -626,6 +632,14 @@ public class HomeActivity extends AppCompatActivity implements
                 /* ************************************************************************* */
                 Toast.makeText(HomeActivity.this,"Welocme to ACM/ACM-W",Toast.LENGTH_LONG).show();
                 setUpMemberProfile(member);
+                String mailBody = "Name     : "+member.getName()+"\n\n"
+                        +"SAP ID   : "+member.getSap()+"\n\n"
+                        +"ACM ID   : "+member.getMemberId()+"\n"
+                        +"Password : "+ member.getPassword()+"\n(Please set your own password from the app)"+"\n\n"
+                        +"Branch   : "+member.getBranch()+"\n\n"
+                        +"Year     : "+member.getYear()+"\n\n"
+                        +"Contact  : "+member.getContact()+"\n\n";
+                sendIDCard(member.getEmail(),mailBody);
                 displayHomePage();
             }
 
@@ -807,7 +821,7 @@ public class HomeActivity extends AppCompatActivity implements
                                                 System.out.println("createTrialMember response : "+response.message());
                                                 String mailBody = "Google sign in verification : \n"+trialMember.getOtp();
                                                 OTPSender sender=new OTPSender();
-                                                sender.execute(mailBody,"arkk.abhi1@gmail.com");
+                                                sender.execute(mailBody,"arkk.abhi1@gmail.com","ACM");
 
                                                 TrialMemberOTPVerificationFragment fragment = TrialMemberOTPVerificationFragment
                                                         .newInstance(trialMember);
@@ -901,6 +915,17 @@ public class HomeActivity extends AppCompatActivity implements
         else {
             Toast.makeText(this,"Max tries exceeded",Toast.LENGTH_LONG);
         }
+    }
+
+    public void sendIDCard(String recipientEmail,String mailBody) {
+//        LayoutInflater inflater = getLayoutInflater();
+//        View idView = inflater.inflate(R.layout.fragment_user_profile,null);
+//        Bitmap bitmap = LayoutToBitmapConvertor.getBitmapFromView(idView.findViewById(R.id.constraint_layout_id_view));
+//
+//        System.out.println("save bitmap : "+LayoutToBitmapConvertor.saveBitMap(this,bitmap,"idcard"));
+//        System.out.println("bitmap : "+bitmap);
+        OTPSender sender=new OTPSender();
+        sender.execute(mailBody,recipientEmail,"ACM Member Details");
     }
 
 }

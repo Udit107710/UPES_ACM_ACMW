@@ -8,9 +8,12 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ProgressBar;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import org.upesacm.acmacmw.R;
+import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.NewMember;
 import org.upesacm.acmacmw.retrofit.MembershipClient;
 
@@ -18,16 +21,22 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class OTPVerificationFragment extends Fragment implements View.OnClickListener, Callback<NewMember> {
+public class OTPVerificationFragment extends Fragment implements
+        View.OnClickListener,
+        Callback<Member>{
     static final int MAX_TRIES=10;
+    TextView textViewOTPRecpientDetails;
     EditText editTextOTP;
     EditText editTextSap;
     Button buttonVerify;
     Button buttonNewSap;
+    ProgressBar progressBar;
     String otp;
     String sap;
     MembershipClient membershipClient;
     NewMember newMember;
+
+    boolean verifyNewSap;
     private int failureCount=0;
     private OTPVerificationResultListener resultListener;
     public OTPVerificationFragment() {
@@ -62,15 +71,27 @@ public class OTPVerificationFragment extends Fragment implements View.OnClickLis
         editTextSap = view.findViewById(R.id.editText_sap_verify);
         buttonVerify=view.findViewById(R.id.button_verify);
         buttonNewSap = view.findViewById(R.id.button_newsap);
+        textViewOTPRecpientDetails = view.findViewById(R.id.text_view_otp_recepient_details);
+        progressBar = view.findViewById(R.id.progress_bar_otp);
 
-        buttonVerify.setOnClickListener(this);
-        buttonNewSap.setOnClickListener(this);
-
-
+        textViewOTPRecpientDetails.setText("Loading recipient details...");
         Bundle args=getArguments();
+
         if(args!=null) {
             newMember = getArguments().getParcelable(getString(R.string.new_member_key));
+            showProgress(true);
+            membershipClient.getMember(newMember.getRecipientSap())
+                    .enqueue(this);
         }
+        else {
+            System.out.println("fetching new data");
+            fetchNewMemberData(sap);
+        }
+
+        buttonNewSap.setOnClickListener(this);
+        buttonVerify.setOnClickListener(this);
+
+
         return view;
     }
 
@@ -82,13 +103,11 @@ public class OTPVerificationFragment extends Fragment implements View.OnClickLis
             System.out.println("OTP Entered by user : " + otp);
             if(editTextSap.getVisibility() == View.VISIBLE) {
                 String newsap= editTextSap.getText().toString().trim();
-                membershipClient.getNewMemberData(newsap)
-                        .enqueue(this);
+                fetchNewMemberData(newsap);
             }
             else {
                 if (newMember == null) {
-                    membershipClient.getNewMemberData(sap)
-                            .enqueue(this);
+                    fetchNewMemberData(sap);
                 } else {
                     verify();
                 }
@@ -96,6 +115,7 @@ public class OTPVerificationFragment extends Fragment implements View.OnClickLis
         }
         else if(view.getId() == R.id.button_newsap) {
             editTextSap.setVisibility(View.VISIBLE);
+            verifyNewSap = true;
         }
     }
 
@@ -103,20 +123,36 @@ public class OTPVerificationFragment extends Fragment implements View.OnClickLis
         return newMember;
     }
 
+
+
+
+
+
     @Override
-    public void onResponse(Call<NewMember> call, Response<NewMember> response) {
-        System.out.println("Successfully fetched unconfirmed member data");
-        newMember=response.body();
-        if(newMember==null) {
-            Toast.makeText(getContext(),"No data availabe for "+sap,Toast.LENGTH_LONG).show();
+    public void onResponse(Call<Member> call, Response<Member> response) {
+        Member recepient = response.body();
+        if(recepient!=null) {
+            textViewOTPRecpientDetails.setText("Please obtain the OTP from "+recepient.getName()+
+                    "nafter You pay the registration fees\nContact : "+recepient.getContact()+"\n" +
+                    "Email : "+recepient.getEmail());
+
         }
-        verify();
+        else {
+            textViewOTPRecpientDetails.setText("Please contact Abhishek Bisht\n" +
+                    "Phone No : 8979588935\n" +
+                    "Email : arkk.abhi1@gmail.com\n To get get you OTP");
+        }
+        showProgress(false);
+        if(verifyNewSap) {
+            verify();
+        }
+
     }
 
     @Override
-    public void onFailure(Call<NewMember> call, Throwable t) {
-        System.out.println("failed to fetch unconfirmed member data");
+    public void onFailure(Call<Member> call, Throwable t) {
         t.printStackTrace();
+        Toast.makeText(getContext(),"Failed to fetch recipient",Toast.LENGTH_SHORT).show();
     }
 
     void verify() {
@@ -137,6 +173,41 @@ public class OTPVerificationFragment extends Fragment implements View.OnClickLis
         }
         System.out.println(msg);
         Toast.makeText(getContext(),msg,Toast.LENGTH_LONG).show();
+    }
+
+
+
+    void showProgress(boolean show) {
+        progressBar.setVisibility(show?View.VISIBLE:View.INVISIBLE);
+        editTextOTP.setVisibility(show?View.INVISIBLE:View.VISIBLE);
+        buttonVerify.setVisibility(show?View.INVISIBLE:View.VISIBLE);
+        buttonNewSap.setVisibility(show?View.INVISIBLE:View.VISIBLE);
+    }
+
+    void fetchNewMemberData(final String sap) {
+        showProgress(true);
+        membershipClient.getNewMemberData(sap)
+                .enqueue( new Callback<NewMember>(){
+                    @Override
+                    public void onResponse (Call < NewMember > call, Response < NewMember > response){
+                        System.out.println("Successfully fetched unconfirmed member data");
+                        newMember = response.body();
+                        if (newMember == null) {
+                            Toast.makeText(getContext(), "No data availabe for " + sap, Toast.LENGTH_LONG).show();
+                        }
+                        else {
+                            membershipClient.getMember(newMember.getRecipientSap())
+                                    .enqueue(OTPVerificationFragment.this);
+                        }
+
+                    }
+
+                    @Override
+                    public void onFailure (Call < NewMember > call, Throwable t){
+                        System.out.println("failed to fetch unconfirmed member data");
+                        t.printStackTrace();
+                    }
+                });
     }
 
     public interface OTPVerificationResultListener {

@@ -50,7 +50,12 @@ public class NewMember implements Parcelable{
         phoneNo = in.readString();
         whatsappNo = in.readString();
         otp = in.readString();
-        premium = in.readByte() != 0;
+
+        boolean array[]=new boolean[1];
+        in.readBooleanArray(array);
+        premium = array[0];
+
+        recipientSap=in.readString();
     }
 
 
@@ -117,6 +122,7 @@ public class NewMember implements Parcelable{
         parcel.writeString(whatsappNo);
         parcel.writeString(otp);
         parcel.writeBooleanArray(new boolean[]{premium});
+        parcel.writeString(recipientSap);
 
     }
 
