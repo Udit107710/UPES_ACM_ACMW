@@ -808,7 +808,6 @@ public class HomeActivity extends AppCompatActivity implements
                                                 String mailBody = "Google sign in verification : \n"+trialMember.getOtp();
                                                 OTPSender sender=new OTPSender();
                                                 sender.execute(mailBody,"arkk.abhi1@gmail.com");
-
                                                 TrialMemberOTPVerificationFragment fragment = TrialMemberOTPVerificationFragment
                                                         .newInstance(trialMember);
                                                 fragmentManager.beginTransaction()

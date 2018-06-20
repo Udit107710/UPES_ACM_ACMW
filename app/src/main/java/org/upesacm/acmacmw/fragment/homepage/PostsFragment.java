@@ -126,17 +126,17 @@ public class PostsFragment extends Fragment
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         System.out.println("onCreate post fragment");
-        childFm=getChildFragmentManager();
+        childFm = getChildFragmentManager();
 
         Calendar calendar = Calendar.getInstance();
-
-        postsReference= database
-                .getReference("posts/"+"Y"+calendar.get(Calendar.YEAR)+"/"
-                        +"M"+calendar.get(Calendar.MONTH));
-        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
-        StrictMode.setVmPolicy(builder.build());
+        if (database != null) {
+            postsReference = database
+                    .getReference("posts/" + "Y" + calendar.get(Calendar.YEAR) + "/"
+                            + "M" + calendar.get(Calendar.MONTH));
+            StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+            StrictMode.setVmPolicy(builder.build());
+        }
     }
-
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -150,6 +150,7 @@ public class PostsFragment extends Fragment
         recyclerViewAdapter=new PostsRecyclerViewAdapter(recyclerView,homePageClient,database);
 
         recyclerViewAdapter.setOnLoadMoreListener(this);
+
 
 
         recyclerView.setLayoutManager(new LinearLayoutManager(getContext()));
