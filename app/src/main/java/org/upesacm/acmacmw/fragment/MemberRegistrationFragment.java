@@ -139,7 +139,7 @@ public class MemberRegistrationFragment extends Fragment implements View.OnClick
                                     @Override
                                     public void onResponse(Call<NewMember> call, Response<NewMember> response) {
                                         if(response.code()==200) {
-                                            MemberRegistrationFragment.this.saveSignUpInfoLocally();
+                                            //MemberRegistrationFragment.this.saveSignUpInfoLocally();
                                             resultListener.onRegistrationDataSave(DATA_SAVE_SUCCESSFUL,newMember);
                                             resetRegistrationPage();
                                         }

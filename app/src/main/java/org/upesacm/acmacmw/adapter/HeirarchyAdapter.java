@@ -116,4 +116,5 @@ public class HeirarchyAdapter extends RecyclerView.Adapter<HeirarchyAdapter.Heir
     public int getItemCount() {
         return heirarchyModels.size();
     }
+
 }

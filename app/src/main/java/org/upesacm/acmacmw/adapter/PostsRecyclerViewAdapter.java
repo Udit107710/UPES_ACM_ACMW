@@ -26,6 +26,7 @@ import com.google.firebase.database.ValueEventListener;
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.activity.HomeActivity;
 import org.upesacm.acmacmw.fragment.GoogleSignInFragment;
+import org.upesacm.acmacmw.fragment.LoginDialogFragment;
 import org.upesacm.acmacmw.listener.OnLoadMoreListener;
 import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.model.Post;
@@ -79,22 +80,22 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
             Post post=posts.get(position);
             ((PostViewHolder) holder).bindData(post);
 
-            if(signedInMember != null || trialMember!=null) {
-                boolean previouslyLiked = false;
-
-                String signedInUserSap = (signedInMember == null) ? trialMember.getSap() : signedInMember.getSap();
-                for (String ownerSapId : post.getLikesIds()) {
-                    if (ownerSapId.equals(signedInUserSap)) {
-                        previouslyLiked = true;
-                        break;
-                    }
-                }
-                if (previouslyLiked) {
-                    ((PostViewHolder) holder).imageButtonLike.setImageResource(R.drawable.ic_thumb_up_blue_24dp);
-                } else {
-                    ((PostViewHolder) holder).imageButtonLike.setImageResource(R.drawable.like);
-                }
-            }
+//            if(signedInMember != null || trialMember!=null) {
+//                boolean previouslyLiked = false;
+//
+//                String signedInUserSap = (signedInMember == null) ? trialMember.getSap() : signedInMember.getSap();
+//                for (String ownerSapId : post.getLikesIds()) {
+//                    if (ownerSapId.equals(signedInUserSap)) {
+//                        previouslyLiked = true;
+//                        break;
+//                    }
+//                }
+//                if (previouslyLiked) {
+//                    ((PostViewHolder) holder).imageButtonLike.setImageResource(R.drawable.ic_thumb_up_blue_24dp);
+//                } else {
+//                    ((PostViewHolder) holder).imageButtonLike.setImageResource(R.drawable.like);
+//                }
+//            }
         }
     }
 
@@ -146,11 +147,30 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
             this.post=post;
             String postUrl = "posts/"+post.getYearId()+"/"+post.getMonthId()+"/"+post.getPostId();
             postReference = database.getReference(postUrl);
-            if(signedInMember!=null) {
-                post.syncOwnerData(signedInMember);
-            }
-            else if(trialMember!=null) {
-                post.syncOwnerData(trialMember);
+            if(signedInMember != null || trialMember!=null) {
+                String signedInUserSap;
+                if(signedInMember!=null) {
+                    post.syncOwnerData(signedInMember);
+                    signedInUserSap = signedInMember.getSap();
+
+                }
+                else  {
+                    post.syncOwnerData(trialMember);
+                    signedInUserSap = trialMember.getSap();
+                }
+
+                boolean previouslyLiked = false;
+                for (String ownerSapId : post.getLikesIds()) {
+                    if (ownerSapId.equals(signedInUserSap)) {
+                        previouslyLiked = true;
+                        break;
+                    }
+                }
+                if (previouslyLiked) {
+                    imageButtonLike.setImageResource(R.drawable.ic_thumb_up_blue_24dp);
+                } else {
+                    imageButtonLike.setImageResource(R.drawable.like);
+                }
             }
             postReference.setValue(post);
             username.setText(post.getOwnerName());
@@ -207,12 +227,11 @@ public class PostsRecyclerViewAdapter extends RecyclerView.Adapter {
                     postReference.setValue(post);
                 }
                 else {
-                    Toast.makeText(recyclerView.getContext(),"Please log in to like",Toast.LENGTH_LONG).show();
-                    GoogleSignInFragment fragment = new GoogleSignInFragment();
                     AppCompatActivity activity = (AppCompatActivity)recyclerView.getContext();
-                    activity.getSupportFragmentManager().beginTransaction()
-                            .replace(R.id.frame_layout, fragment,activity.getString(R.string.fragment_tag_google_sign_in))
-                            .commit();
+                    LoginDialogFragment loginDialogFragment =new LoginDialogFragment();
+                    loginDialogFragment.show(activity.getSupportFragmentManager(),
+                            activity.getString(R.string.dialog_fragment_tag_login));
+                    Toast.makeText(recyclerView.getContext(),"Please log in to like",Toast.LENGTH_LONG).show();
                     System.out.println("like button User not signed in");
                 }
 

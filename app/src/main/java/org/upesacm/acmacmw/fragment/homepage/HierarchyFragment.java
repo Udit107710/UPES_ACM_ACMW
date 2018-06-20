@@ -24,9 +24,14 @@ import org.upesacm.acmacmw.adapter.PagerAdapter;
 public class HierarchyFragment extends Fragment {
     ViewPager viewPager;
     PagerAdapter mPagerAdapter;
-    FirebaseDatabase mFirebaseDatabase;
-    DatabaseReference mDatabaseReference;
+    FirebaseDatabase database;
 
+
+    public static HierarchyFragment newInstance(FirebaseDatabase database) {
+        HierarchyFragment fragment=new HierarchyFragment();
+        fragment.database = database;
+        return fragment;
+    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -42,25 +47,10 @@ public class HierarchyFragment extends Fragment {
         tabLayout.addTab(tabLayout.newTab().setText("ACM-W"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
          viewPager = (ViewPager) view.findViewById(R.id.pager);
-         mPagerAdapter=new PagerAdapter(getActivity().getSupportFragmentManager());
+         mPagerAdapter=new PagerAdapter(getActivity().getSupportFragmentManager(),database);
         viewPager.setAdapter(mPagerAdapter);
          viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
-        tabLayout.setOnTabSelectedListener(new TabLayout.OnTabSelectedListener() {
-            @Override
-            public void onTabSelected(TabLayout.Tab tab) {
-                viewPager.setCurrentItem(tab.getPosition());
-            }
-
-            @Override
-            public void onTabUnselected(TabLayout.Tab tab) {
-
-            }
-
-            @Override
-            public void onTabReselected(TabLayout.Tab tab) {
-
-            }
-        });
+        tabLayout.setupWithViewPager(viewPager);
 
         return view;
     }

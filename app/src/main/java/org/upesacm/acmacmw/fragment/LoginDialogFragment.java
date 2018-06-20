@@ -3,6 +3,7 @@ package org.upesacm.acmacmw.fragment;
 import android.content.Context;
 import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,7 @@ public class LoginDialogFragment extends DialogFragment implements View.OnClickL
     Button buttonLogin;
     Button buttonCancel;
     Button buttonSignup;
+    Button buttonGuestSignUp;
     
     private String username,password;
     InteractionListener interactionListener;
@@ -46,10 +48,12 @@ public class LoginDialogFragment extends DialogFragment implements View.OnClickL
         buttonLogin=view.findViewById(R.id.button_login);
         buttonCancel=view.findViewById(R.id.button_cancel);
         buttonSignup=view.findViewById(R.id.button_signup);
+        buttonGuestSignUp=view.findViewById(R.id.button_guest_sign_up);
 
         buttonSignup.setOnClickListener(this);
         buttonLogin.setOnClickListener(this);
         buttonCancel.setOnClickListener(this);
+        buttonGuestSignUp.setOnClickListener(this);
         return view;
     }
 
@@ -62,6 +66,9 @@ public class LoginDialogFragment extends DialogFragment implements View.OnClickL
         }
         else if(view.getId()==R.id.button_signup){
             interactionListener.onSignUpPressed(this);
+        }
+        else if(view.getId() == R.id.button_guest_sign_up){
+            interactionListener.onGuestSignUpPressed(this);
         }
         else {
             interactionListener.onCancelPressed(this);
@@ -80,5 +87,6 @@ public class LoginDialogFragment extends DialogFragment implements View.OnClickL
         void onLoginPressed(LoginDialogFragment loginDialogFragment);
         void onSignUpPressed(LoginDialogFragment loginDialogFragment);
         void onCancelPressed(LoginDialogFragment loginDialogFragment);
+        void onGuestSignUpPressed(LoginDialogFragment loginDialogFragment);
     }
 }

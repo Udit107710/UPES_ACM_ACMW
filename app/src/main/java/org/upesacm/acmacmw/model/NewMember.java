@@ -33,6 +33,13 @@ public class NewMember implements Parcelable{
     private String sapId;
     private String phoneNo;
     private String whatsappNo;
+    private String recipientSap;
+    private String otp;
+    private boolean premium;
+
+
+
+
 
     protected NewMember(Parcel in) {
         fullName = in.readString();
@@ -48,11 +55,14 @@ public class NewMember implements Parcelable{
 
 
 
-    private String otp;
-    private boolean premium;
+
 
     public NewMember() {
 
+    }
+
+    public String getRecipientSap() {
+        return recipientSap;
     }
 
     public String getFullName() {
@@ -120,6 +130,7 @@ public class NewMember implements Parcelable{
         String phoneNo;
         String whatsappNo;
         String otp;
+        String recipientSap;
         boolean premium;
 
         public NewMember build() {
@@ -133,6 +144,7 @@ public class NewMember implements Parcelable{
             newMember.whatsappNo=this.whatsappNo;
             newMember.premium=this.premium;
             newMember.otp=this.otp;
+            newMember.recipientSap = this.recipientSap;
             return newMember;
         }
 
@@ -181,6 +193,9 @@ public class NewMember implements Parcelable{
             return this;
         }
 
+        public Builder setRecipientSap(String recipientSap) {
+            this.recipientSap = recipientSap;
+            return  this;
+        }
     }
-
 }

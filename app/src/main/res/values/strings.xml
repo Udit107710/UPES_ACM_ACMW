@@ -50,9 +50,12 @@
     <string name="dialog_fragment_tag_pass_change">Pass Change dialog fragment</string>
     <string name="fragment_tag_google_sign_in">Google Sign Fragment</string>
     <string name="fragment_tag_trial_otp_verification">Trial Member OTP Verification</string>
+    <string name="fragment_tag_recipients">Fragment Recipients</string>
 
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>
     <string name="available_in_campus">Available In Campus</string>
     <string name="not_availabale">Not Availabale</string>
+
+    <string name="otp_recepients">Please choose one of the following from which you can receive your OTP</string>
 </resources>

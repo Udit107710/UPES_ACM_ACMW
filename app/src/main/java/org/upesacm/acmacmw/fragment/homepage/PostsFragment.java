@@ -115,9 +115,10 @@ public class PostsFragment extends Fragment
         // Required empty public constructor
     }
 
-    public static PostsFragment newInstance(HomePageClient homePageClient) {
+    public static PostsFragment newInstance(FirebaseDatabase database,HomePageClient homePageClient) {
         PostsFragment fragment = new PostsFragment();
         fragment.homePageClient = homePageClient;
+        fragment.database = database;
         return fragment;
     }
 
@@ -128,7 +129,7 @@ public class PostsFragment extends Fragment
         childFm=getChildFragmentManager();
 
         Calendar calendar = Calendar.getInstance();
-        database = FirebaseDatabase.getInstance();
+
         postsReference= database
                 .getReference("posts/"+"Y"+calendar.get(Calendar.YEAR)+"/"
                         +"M"+calendar.get(Calendar.MONTH));
@@ -185,11 +186,9 @@ public class PostsFragment extends Fragment
                 }
             }
             else {
+                LoginDialogFragment loginDialogFragment =new LoginDialogFragment();
+                loginDialogFragment.show(getActivity().getSupportFragmentManager(),getString(R.string.dialog_fragment_tag_login));
                 Toast.makeText(getContext(), "Please Login First", Toast.LENGTH_SHORT).show();
-                GoogleSignInFragment fragment = new GoogleSignInFragment();
-                getActivity().getSupportFragmentManager().beginTransaction()
-                        .replace(R.id.frame_layout, fragment, getString(R.string.fragment_tag_google_sign_in))
-                        .commit();
             }
         }
         else {

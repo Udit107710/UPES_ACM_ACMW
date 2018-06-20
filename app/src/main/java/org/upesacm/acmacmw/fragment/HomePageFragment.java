@@ -17,6 +17,8 @@ import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.database.FirebaseDatabase;
+
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.activity.HomeActivity;
 import org.upesacm.acmacmw.fragment.homepage.ContactUsFragment;
@@ -35,15 +37,18 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
     private HomePageClient homePageClient;
     Context context;
     private FragmentManager childFm;
-
+    FirebaseDatabase database;
+    PostsFragment postsFragment;
+    Fragment userSelectedFragment;
     public HomePageFragment() {
         // Required empty public constructor
     }
 
-    public static HomePageFragment newInstance(HomePageClient homePageClient,Context context) {
+    public static HomePageFragment newInstance(FirebaseDatabase database,HomePageClient homePageClient,Context context) {
         HomePageFragment homePageFragment=new HomePageFragment();
         homePageFragment.homePageClient=homePageClient;
         homePageFragment.context=context;
+        homePageFragment.database = database;
         return homePageFragment;
     }
 
@@ -68,9 +73,11 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
         /* ****************************************************************************** */
 
-        FragmentTransaction ft=childFm.beginTransaction();
-        ft.replace(R.id.frameLayout_homepage, PostsFragment.newInstance(homePageClient),"posts_fragment");
-        ft.commit();
+        postsFragment = PostsFragment.newInstance(database,homePageClient);
+            FragmentTransaction ft = childFm.beginTransaction();
+            ft.replace(R.id.frameLayout_homepage, (userSelectedFragment==null)?postsFragment:userSelectedFragment
+                    , "posts_fragment");
+            ft.commit();
 
         return view;
     }
@@ -121,24 +128,27 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
 
         if(item.getItemId()==R.id.action_posts) {
             FragmentTransaction ft=childFm.beginTransaction();
-            ft.add(R.id.frameLayout_homepage, PostsFragment.newInstance(homePageClient));
+            userSelectedFragment = postsFragment;
+            ft.replace(R.id.frameLayout_homepage, userSelectedFragment);
             ft.commit();
         }
         else if(item.getItemId()==R.id.action_upcoming_events) {
             FragmentTransaction ft=childFm.beginTransaction();
-            ft.add(R.id.frameLayout_homepage, new UpcomingEventsFragment());
-            ft.addToBackStack("homepage");
+            userSelectedFragment = new UpcomingEventsFragment();
+            ft.replace(R.id.frameLayout_homepage,userSelectedFragment );
             ft.commit();
         }
         else if(item.getItemId() == R.id.action_heirarchy) {
+            HierarchyFragment hierarchyFragment = HierarchyFragment.newInstance(database);
             FragmentTransaction ft=childFm.beginTransaction();
-            ft.add(R.id.frameLayout_homepage, new HierarchyFragment());
-            ft.addToBackStack("homepage");
+            userSelectedFragment = hierarchyFragment;
+            ft.replace(R.id.frameLayout_homepage,userSelectedFragment);
             ft.commit();
         }
         else if(item.getItemId() == R.id.action_contact) {
             FragmentTransaction ft=childFm.beginTransaction();
-            ft.add(R.id.frameLayout_homepage, new ContactUsFragment());
+            userSelectedFragment=new ContactUsFragment();
+            ft.replace(R.id.frameLayout_homepage, userSelectedFragment);
             ft.addToBackStack("homepage");
             ft.commit();
         }

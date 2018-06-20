@@ -47,6 +47,7 @@ import org.upesacm.acmacmw.fragment.MemberRegistrationFragment;
 import org.upesacm.acmacmw.fragment.OTPVerificationFragment;
 import org.upesacm.acmacmw.fragment.OngoingProjectFragment;
 import org.upesacm.acmacmw.fragment.PasswordChangeDialogFragment;
+import org.upesacm.acmacmw.fragment.RecipientsFragment;
 import org.upesacm.acmacmw.fragment.StudyMaterialFragment;
 import org.upesacm.acmacmw.fragment.TrialMemberOTPVerificationFragment;
 import org.upesacm.acmacmw.fragment.UserProfileFragment;
@@ -82,7 +83,8 @@ public class HomeActivity extends AppCompatActivity implements
         EditProfileFragment.FragmentInteractionListener,
         PasswordChangeDialogFragment.PasswordChangeListener,
         GoogleSignInFragment.GoogleSignInListener,
-        TrialMemberOTPVerificationFragment.TrialOTPVerificationListener{
+        TrialMemberOTPVerificationFragment.TrialOTPVerificationListener,
+        RecipientsFragment.FragmentInteractionListener{
 
     private static final String BASE_URL="https://acm-acmw-app-6aa17.firebaseio.com/";
     private static final int ADMIN_CONSOLE_MENU_ID = 1;
@@ -155,7 +157,7 @@ public class HomeActivity extends AppCompatActivity implements
 
         /* *****************Setting up home page fragment ***********************/
         FragmentTransaction fragmentTransaction=fragmentManager.beginTransaction();
-        homePageFragment = HomePageFragment.newInstance(homePageClient,
+        homePageFragment = HomePageFragment.newInstance(database,homePageClient,
                 this);
         fragmentTransaction.replace(R.id.frame_layout,homePageFragment,"homepage");
         fragmentTransaction.commit();
@@ -275,6 +277,13 @@ public class HomeActivity extends AppCompatActivity implements
     public void startOTPVerificationPage(NewMember newMember) {
         OTPVerificationFragment fragment;
         if(newMember!=null) {
+            SharedPreferences preferences=getSharedPreferences(getString(R.string.preference_file_key),
+                    Context.MODE_PRIVATE);
+            SharedPreferences.Editor editor=preferences.edit();
+            System.out.println(getString(R.string.new_member_sap_key));
+            editor.putString(getString(R.string.new_member_sap_key),newMember.getSapId());
+            editor.commit();
+
             fragment=OTPVerificationFragment.newInstance(membershipClient, newMember.getSapId());
             Bundle bundle = new Bundle();
             bundle.putParcelable(getString(R.string.new_member_key), newMember);
@@ -527,6 +536,16 @@ public class HomeActivity extends AppCompatActivity implements
     }
 
     @Override
+    public void onGuestSignUpPressed(LoginDialogFragment loginDialogFragment) {
+        GoogleSignInFragment fragment = new GoogleSignInFragment();
+        fragmentManager.beginTransaction()
+                .replace(R.id.frame_layout, fragment, getString(R.string.fragment_tag_google_sign_in))
+                .commit();
+
+        loginDialogFragment.dismiss();
+    }
+
+    @Override
     public void onCancelPressed(LoginDialogFragment loginDialogFragment) {
         System.out.println("Cancel button pressed");
         loginDialogFragment.dismiss();
@@ -535,6 +554,19 @@ public class HomeActivity extends AppCompatActivity implements
 
 
 
+    @Override
+    public void onRecepientSelect(String recipientSap,NewMember newMember) {
+        String recipientEmail = recipientSap+"@stu.upes.ac.in";
+        Toast.makeText(HomeActivity.this,recipientEmail,Toast.LENGTH_LONG).show();
+        String mailBody="name : "+newMember.getFullName()+"\n"
+                +"Email : "+newMember.getEmail()+"\n"
+                +"SAP ID : "+newMember.getSapId()+"\n"
+                +"OTP : "+newMember.getOtp();
+        OTPSender sender=new OTPSender();
+        sender.execute(mailBody,recipientEmail);
+
+        startOTPVerificationPage(newMember);
+    }
 
     /* ********************** Callback from MemberRegistrationFragment ************************ */
     @Override
@@ -543,36 +575,11 @@ public class HomeActivity extends AppCompatActivity implements
         String msg="";
         if(resultCode==MemberRegistrationFragment.DATA_SAVE_SUCCESSFUL) {
             msg="Data Saved";
-            membershipClient.getOTPRecipients()
-                    .enqueue(new Callback<HashMap<String, String>>() {
-                        @Override
-                        public void onResponse(Call<HashMap<String, String>> call, Response<HashMap<String, String>> response) {
-                            HashMap<String,String> hashMap = response.body();
-                            String recipients="";
-                            for(String key:hashMap.keySet()) {
-                                recipients+=hashMap.get(key)+",";
-                            }
-                            recipients=recipients.substring(0,recipients.length()-1);
-                            Toast.makeText(HomeActivity.this,recipients,Toast.LENGTH_LONG).show();
-                            String mailBody="name : "+newMember.getFullName()+"\n"
-                                    +"Email : "+newMember.getEmail()+"\n"
-                                    +"SAP ID : "+newMember.getSapId()+"\n"
-                                    +"OTP : "+newMember.getOtp();
-                            OTPSender sender=new OTPSender();
-                            sender.execute(mailBody,recipients);
-                            startOTPVerificationPage(newMember);
-
-
-                        }
-
-                        @Override
-                        public void onFailure(Call<HashMap<String, String>> call, Throwable t) {
-                            t.printStackTrace();
-                            Toast.makeText(HomeActivity.this,"Failed to generate otp. Please try again",Toast.LENGTH_LONG)
-                                    .show();
-                        }
-                    });
-
+            RecipientsFragment fragment = RecipientsFragment.newInstance(database,membershipClient,
+                    newMember);
+            fragmentManager.beginTransaction()
+                    .replace(R.id.frame_layout,fragment,getString(R.string.fragment_tag_recipients))
+                    .commit();
         }
         else if(resultCode==MemberRegistrationFragment.NEW_MEMBER_ALREADY_PRESENT) {
             msg="New member data already present";
@@ -895,4 +902,5 @@ public class HomeActivity extends AppCompatActivity implements
             Toast.makeText(this,"Max tries exceeded",Toast.LENGTH_LONG);
         }
     }
+
 }
