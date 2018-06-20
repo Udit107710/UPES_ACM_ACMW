@@ -717,7 +717,7 @@ public class HomeActivity extends AppCompatActivity implements
                 .commit();
 
         FragmentTransaction ft = fragmentManager.beginTransaction();
-        ft.add(R.id.frame_layout,EditProfileFragment.newInstance(membershipClient,signedInMember));
+        ft.replace(R.id.frame_layout,EditProfileFragment.newInstance(membershipClient,signedInMember));
         ft.addToBackStack(null);
         ft.commit();
     }
