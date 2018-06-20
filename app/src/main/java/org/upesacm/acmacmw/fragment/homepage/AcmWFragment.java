@@ -30,15 +30,12 @@ public class AcmWFragment extends android.support.v4.app.Fragment {
     RecyclerView mRecyclerView;
     List<HeirarchyModel> acmWheirarchyModels;
 
-    public static AcmWFragment newInstance(FirebaseDatabase database) {
-        AcmWFragment fragment=new AcmWFragment();
-        fragment.mFirebaseDatabase = database;
-        return fragment;
-    }
+
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        mFirebaseDatabase=FirebaseDatabase.getInstance();
         mDatabaseReference=mFirebaseDatabase.getReference().child("Heirarchy");
     }
 

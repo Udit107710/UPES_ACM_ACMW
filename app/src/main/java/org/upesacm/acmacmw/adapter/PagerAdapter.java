@@ -10,20 +10,19 @@ import org.upesacm.acmacmw.fragment.homepage.AcmFragment;
 import org.upesacm.acmacmw.fragment.homepage.AcmWFragment;
 
 public class PagerAdapter extends FragmentStatePagerAdapter {
-    FirebaseDatabase database;
-    public PagerAdapter(FragmentManager fm, FirebaseDatabase database) {
+
+    public PagerAdapter(FragmentManager fm) {
         super(fm);
-        this.database = database;
+
     }
 
     @Override
     public Fragment getItem(int position) {
         switch (position) {
             case 0:
-                return AcmFragment.newInstance(database);
+                return new AcmFragment();
             case 1:
-
-                return AcmWFragment.newInstance(database);
+                return new AcmWFragment();
             default:
                 return new Fragment();
         }

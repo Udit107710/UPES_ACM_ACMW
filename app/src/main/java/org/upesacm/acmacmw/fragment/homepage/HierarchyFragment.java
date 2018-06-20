@@ -24,14 +24,6 @@ import org.upesacm.acmacmw.adapter.PagerAdapter;
 public class HierarchyFragment extends Fragment {
     ViewPager viewPager;
     PagerAdapter mPagerAdapter;
-    FirebaseDatabase database;
-
-
-    public static HierarchyFragment newInstance(FirebaseDatabase database) {
-        HierarchyFragment fragment=new HierarchyFragment();
-        fragment.database = database;
-        return fragment;
-    }
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -47,7 +39,7 @@ public class HierarchyFragment extends Fragment {
         tabLayout.addTab(tabLayout.newTab().setText("ACM-W"));
         tabLayout.setTabGravity(TabLayout.GRAVITY_FILL);
          viewPager = (ViewPager) view.findViewById(R.id.pager);
-         mPagerAdapter=new PagerAdapter(getActivity().getSupportFragmentManager(),database);
+         mPagerAdapter=new PagerAdapter(getActivity().getSupportFragmentManager());
         viewPager.setAdapter(mPagerAdapter);
          viewPager.addOnPageChangeListener(new TabLayout.TabLayoutOnPageChangeListener(tabLayout));
         tabLayout.setupWithViewPager(viewPager);
