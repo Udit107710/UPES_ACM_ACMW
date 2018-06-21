@@ -1,6 +1,7 @@
 package org.upesacm.acmacmw.fragment;
 
 import android.content.Context;
+import android.graphics.Typeface;
 import android.support.v4.app.DialogFragment;
 import android.os.Bundle;
 import android.util.Log;
@@ -9,6 +10,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.TextView;
 
 import org.upesacm.acmacmw.R;
 
@@ -49,6 +51,10 @@ public class LoginDialogFragment extends DialogFragment implements View.OnClickL
         buttonCancel=view.findViewById(R.id.button_cancel);
         buttonSignup=view.findViewById(R.id.button_signup);
         buttonGuestSignUp=view.findViewById(R.id.button_guest_sign_up);
+
+        TextView logincred =view.findViewById(R.id.text_view_login_credentials);
+        Typeface type = Typeface.createFromAsset(getContext().getAssets(),"Fonts/product_sans_regular.ttf");
+        logincred.setTypeface(type);
 
         buttonSignup.setOnClickListener(this);
         buttonLogin.setOnClickListener(this);
