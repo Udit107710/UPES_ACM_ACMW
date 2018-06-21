@@ -29,8 +29,8 @@ public class UserProfileFragment extends Fragment implements
     TextView textViewSap;
     TextView textViewContact;
 
-    FloatingActionButton fabEdit;
-    FloatingActionButton fabLogout;
+    TextView fabEdit;
+    TextView fabLogout;
 
     Member member;
     private TextView memberId;
@@ -79,6 +79,7 @@ public class UserProfileFragment extends Fragment implements
         textViewSap.setText(member.getSap());
         textViewContact.setText(member.getContact());
         memberId.setText(member.getMemberId());
+
         fabEdit.setOnClickListener(this);
         fabLogout.setOnClickListener(this);
         return view;
