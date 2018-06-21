@@ -109,9 +109,12 @@
                 android:id="@+id/image_button_post_delete"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_weight="0"
-                android:visibility="gone"
-                card_view:srcCompat="@android:drawable/ic_menu_delete" />
+                android:layout_margin="4dp"
+                android:layout_marginTop="1dp"
+                android:visibility="visible"
+                android:background="#fff"
+                android:src="@drawable/ic_delete_black_24dp"
+                />
 
             <TextView
                 android:id="@+id/text_view_post_caption"
