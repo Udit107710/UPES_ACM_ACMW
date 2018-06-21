@@ -132,15 +132,15 @@ public class OTPVerificationFragment extends Fragment implements
     public void onResponse(Call<Member> call, Response<Member> response) {
         Member recepient = response.body();
         if(recepient!=null) {
-            textViewOTPRecpientDetails.setText("Please obtain the OTP from "+recepient.getName()+
-                    "nafter You pay the registration fees\nContact : "+recepient.getContact()+"\n" +
-                    "Email : "+recepient.getEmail());
+            textViewOTPRecpientDetails.setText("Name    : "+recepient.getName()+
+                    "Contact : "+recepient.getContact()+"\n" +
+                    "Email   : "+recepient.getEmail());
 
         }
         else {
-            textViewOTPRecpientDetails.setText("Please contact Abhishek Bisht\n" +
-                    "Phone No : 8979588935\n" +
-                    "Email : arkk.abhi1@gmail.com\n To get get you OTP");
+            textViewOTPRecpientDetails.setText("Name     : Abhishek Bisht\n" +
+                    "Contact : 8979588935\n" +
+                    "Email   : arkk.abhi1@gmail.com");
         }
         showProgress(false);
         if(verifyNewSap) {

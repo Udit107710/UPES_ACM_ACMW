@@ -88,7 +88,7 @@ public class PasswordChangeDialogFragment extends DialogFragment
         newpass = editTextNewPass.getText().toString().trim();
         if(view.getId() == R.id.button_pass_change_save) {
             if(oldpass.equals(member.getPassword())) {
-                Member modifiedMember = new Member.Builder()
+                member = new Member.Builder()
                         .setmemberId(member.getMemberId())
                         .setName(member.getName())
                         .setPassword(newpass)
@@ -99,7 +99,7 @@ public class PasswordChangeDialogFragment extends DialogFragment
                         .setYear(member.getYear())
                         .build();
 
-                membershipClient.createMember(modifiedMember.getSap(),modifiedMember)
+                membershipClient.createMember(member.getSap(),member)
                         .enqueue(new Callback<Member>() {
                             @Override
                             public void onResponse(Call<Member> call, Response<Member> response) {
@@ -127,7 +127,7 @@ public class PasswordChangeDialogFragment extends DialogFragment
         }
     }
     public String getNewPass() {
-        return newpass;
+        return member.getPassword();
     }
 
     public interface PasswordChangeListener {

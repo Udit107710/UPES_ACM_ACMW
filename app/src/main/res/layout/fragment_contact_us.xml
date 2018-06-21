@@ -1,15 +1,105 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".fragment.homepage.ContactUsFragment"
-    android:background="@android:color/white">
+    android:fillViewport="true">
 
-    <!-- TODO: Update blank fragment layout -->
-    <TextView
+
+    <android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="Contact Us Module Work in Progress" />
+        android:layout_height="wrap_content"
+        android:background="@android:color/white"
+        android:paddingBottom="32dp"
+        tools:context=".fragment.homepage.ContactUsFragment">
 
-</FrameLayout>
+        <ImageView
+            android:id="@+id/imageView5"
+            android:layout_width="0dp"
+            android:layout_height="200dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="8dp"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/contact_us_top"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <ImageView
+            android:id="@+id/facebook_button"
+            android:layout_width="65dp"
+            android:layout_height="70dp"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentStart="true"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="64dp"
+            android:src="@drawable/facebook_icon"
+            app:layout_constraintStart_toStartOf="@+id/imageView5"
+            app:layout_constraintTop_toBottomOf="@+id/imageView5" />
+
+        <TextView
+            android:id="@+id/facebook_website"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="8dp"
+            android:text="www.facebook.com/upesacm/"
+            app:layout_constraintBottom_toBottomOf="@+id/facebook_button"
+            app:layout_constraintEnd_toEndOf="@+id/imageView5"
+            app:layout_constraintStart_toEndOf="@+id/facebook_button"
+            app:layout_constraintTop_toTopOf="@+id/facebook_button" />
+
+        <ImageView
+            android:id="@+id/instagram_button"
+            android:layout_width="71dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/instagram_icon"
+            app:layout_constraintStart_toStartOf="@+id/facebook_button"
+            app:layout_constraintTop_toBottomOf="@+id/facebook_button" />
+
+        <TextView
+            android:id="@+id/instagram_website"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="8dp"
+            android:text="www.instagram.com/upesacm/"
+            app:layout_constraintBottom_toBottomOf="@+id/instagram_button"
+            app:layout_constraintEnd_toEndOf="@+id/facebook_website"
+            app:layout_constraintStart_toEndOf="@+id/instagram_button"
+            app:layout_constraintTop_toTopOf="@+id/instagram_button" />
+
+        <ImageView
+            android:id="@+id/gmail_button"
+            android:layout_width="70dp"
+            android:layout_height="70dp"
+            android:layout_marginTop="32dp"
+            android:src="@drawable/gmail_icon"
+            app:layout_constraintStart_toStartOf="@+id/instagram_button"
+            app:layout_constraintTop_toBottomOf="@+id/instagram_button" />
+
+        <TextView
+            android:id="@+id/gmail_website"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="8dp"
+            android:layout_marginEnd="8dp"
+            android:layout_marginStart="32dp"
+            android:layout_marginTop="8dp"
+            android:text="www.upesacm.org"
+            app:layout_constraintBottom_toBottomOf="@+id/gmail_button"
+            app:layout_constraintEnd_toEndOf="@+id/instagram_website"
+            app:layout_constraintStart_toEndOf="@+id/gmail_button"
+            app:layout_constraintTop_toTopOf="@+id/gmail_button" />
+    </android.support.constraint.ConstraintLayout>
+
+</ScrollView>

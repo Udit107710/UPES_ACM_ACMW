@@ -58,4 +58,9 @@
     <string name="not_availabale">Not Availabale</string>
 
     <string name="otp_recepients">Please choose one of the following from which you can receive your OTP</string>
+    <string name="otp_recipients_details">Please Obtain your OTP from the following person after you pay him registration fees</string>
+    <string name="upes_domain">stu.upes.ac.in</string>
+
+    <string name="msg_new_member_already_registered">This SAP ID has Already been registered</string>
+    <string name="msg_already_acm_member">This SAP ID is registered with ACM/ACM-W</string>
 </resources>

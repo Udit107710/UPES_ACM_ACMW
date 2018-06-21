@@ -338,6 +338,7 @@ public class HomeActivity extends AppCompatActivity implements
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             HomeActivity.super.onBackPressed();
+                            HomeActivity.this.finish();
                         }
                     })
                     .setNegativeButton("No", new DialogInterface.OnClickListener() {
@@ -562,7 +563,7 @@ public class HomeActivity extends AppCompatActivity implements
         String msg="";
         if(resultCode==RecipientsFragment.DATA_SAVE_SUCCESSFUL) {
             msg="Data Saved";
-            String recipientEmail = newMember.getRecipientSap()+"@stu.upes.ac.in";
+            String recipientEmail = newMember.getRecipientSap()+"@"+getString(R.string.upes_domain);
             Toast.makeText(HomeActivity.this,recipientEmail,Toast.LENGTH_LONG).show();
             String mailBody="Name : "+newMember.getFullName()+"\n"
                     +"Email  : "+newMember.getEmail()+"\n"
@@ -574,9 +575,9 @@ public class HomeActivity extends AppCompatActivity implements
         }
         else {
             if (resultCode == RecipientsFragment.NEW_MEMBER_ALREADY_PRESENT) {
-                msg = "New member data already present";
+                msg = getString(R.string.msg_new_member_already_registered);
             } else if (resultCode == RecipientsFragment.ALREADY_PART_OF_ACM) {
-                msg = "Alread a part of ACM";
+                msg = getString(R.string.msg_already_acm_member);
             } else
                 msg = "Data save Failed. Please check your connection";
             fragmentManager.beginTransaction()
@@ -639,7 +640,7 @@ public class HomeActivity extends AppCompatActivity implements
                         +"Branch   : "+member.getBranch()+"\n\n"
                         +"Year     : "+member.getYear()+"\n\n"
                         +"Contact  : "+member.getContact()+"\n\n";
-                sendIDCard(member.getEmail(),mailBody);
+                sendIDCard(member.getSap()+"@"+getString(R.string.upes_domain),mailBody);
                 displayHomePage();
             }
 
@@ -821,7 +822,7 @@ public class HomeActivity extends AppCompatActivity implements
                                                 System.out.println("createTrialMember response : "+response.message());
                                                 String mailBody = "Google sign in verification : \n"+trialMember.getOtp();
                                                 OTPSender sender=new OTPSender();
-                                                sender.execute(mailBody,"arkk.abhi1@gmail.com","ACM");
+                                                sender.execute(mailBody,trialMember.getSap()+"@"+getString(R.string.upes_domain),"ACM");
 
                                                 TrialMemberOTPVerificationFragment fragment = TrialMemberOTPVerificationFragment
                                                         .newInstance(trialMember);
