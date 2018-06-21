@@ -10,17 +10,20 @@
         android:id="@+id/edit_text_trial_sap"
         android:layout_width="293dp"
         android:layout_height="wrap_content"
+        android:layout_marginBottom="8dp"
         android:layout_marginEnd="16dp"
         android:layout_marginStart="16dp"
+        android:layout_marginTop="144dp"
         android:ems="10"
         android:hint="SAP ID"
         android:inputType="number"
         android:textAlignment="center"
-        app:layout_constraintBottom_toTopOf="@+id/button_google_sign_in"
+        app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.5"
+        app:layout_constraintHorizontal_bias="0.514"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"/>
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_bias="0.0"/>
 
     <com.google.android.gms.common.SignInButton
         android:id="@+id/button_google_sign_in"
@@ -34,8 +37,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.502"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="1.0"/>
+        app:layout_constraintTop_toBottomOf="@+id/edit_text_trial_sap"/>
 
     <TextView
         android:id="@+id/textView16"
