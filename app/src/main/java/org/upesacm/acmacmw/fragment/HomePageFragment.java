@@ -1,5 +1,6 @@
 package org.upesacm.acmacmw.fragment;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -9,16 +10,23 @@ import android.support.design.widget.BottomNavigationView;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.support.v7.widget.Toolbar;
+import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import com.google.firebase.database.FirebaseDatabase;
+
 import org.upesacm.acmacmw.R;
 import org.upesacm.acmacmw.activity.HomeActivity;
-import org.upesacm.acmacmw.fragment.homepage.HomeFragment;
+import org.upesacm.acmacmw.fragment.homepage.ContactUsFragment;
+import org.upesacm.acmacmw.fragment.homepage.HierarchyFragment;
+import org.upesacm.acmacmw.fragment.homepage.PostsFragment;
+import org.upesacm.acmacmw.fragment.homepage.UpcomingEventsFragment;
+import org.upesacm.acmacmw.model.Member;
 import org.upesacm.acmacmw.retrofit.HomePageClient;
 
 import java.lang.reflect.Field;
@@ -30,14 +38,18 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
     private HomePageClient homePageClient;
     Context context;
     private FragmentManager childFm;
+    FirebaseDatabase database;
+    PostsFragment postsFragment;
+    Fragment userSelectedFragment;
     public HomePageFragment() {
         // Required empty public constructor
     }
 
-    public static Fragment newInstance(HomePageClient homePageClient,Context context) {
+    public static HomePageFragment newInstance(FirebaseDatabase database,HomePageClient homePageClient,Context context) {
         HomePageFragment homePageFragment=new HomePageFragment();
         homePageFragment.homePageClient=homePageClient;
         homePageFragment.context=context;
+        homePageFragment.database = database;
         return homePageFragment;
     }
 
@@ -62,9 +74,11 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
         bottomNavigationView.setOnNavigationItemSelectedListener(this);
         /* ****************************************************************************** */
 
-        FragmentTransaction ft=childFm.beginTransaction();
-        ft.replace(R.id.frameLayout_homepage,HomeFragment.newInstance(homePageClient),"posts_fragment");
-        ft.commit();
+        postsFragment = PostsFragment.newInstance(database,homePageClient);
+            FragmentTransaction ft = childFm.beginTransaction();
+            ft.replace(R.id.frameLayout_homepage, (userSelectedFragment==null)?postsFragment:userSelectedFragment
+                    , "posts_fragment");
+            ft.commit();
 
         return view;
     }
@@ -78,6 +92,7 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
         super.onResume();
     }
 
+    @SuppressLint("RestrictedApi")
     void disableShiftMode(BottomNavigationView view) {
         BottomNavigationMenuView menuView = (BottomNavigationMenuView) view.getChildAt(0);
         try {
@@ -85,13 +100,23 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
             shiftingMode.setAccessible(true);
             shiftingMode.setBoolean(menuView, false);
             shiftingMode.setAccessible(false);
+
             for (int i = 0; i < menuView.getChildCount(); i++) {
                 BottomNavigationItemView item = (BottomNavigationItemView) menuView.getChildAt(i);
                 //noinspection RestrictedApi
                 item.setShiftingMode(false);
+                //icons at centre
+                item.setPadding(0, 20, 0, 0);
                 // set once again checked value, so view will be updated
                 //noinspection RestrictedApi
                 item.setChecked(item.getItemData().isChecked());
+                //increasing icon size
+                final View iconView = menuView.getChildAt(i).findViewById(android.support.design.R.id.icon);
+                final ViewGroup.LayoutParams layoutParams = iconView.getLayoutParams();
+                final DisplayMetrics displayMetrics = getResources().getDisplayMetrics();
+                layoutParams.height = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, displayMetrics);
+                layoutParams.width = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, 32, displayMetrics);
+                iconView.setLayoutParams(layoutParams);
             }
         } catch (NoSuchFieldException e) {
             Log.e("BNVHelper", "Unable to get shift mode field", e);
@@ -103,14 +128,29 @@ public class HomePageFragment extends Fragment implements BottomNavigationView.O
     @Override
     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
 
-        if(item.getItemId()==R.id.action_home) {
+        if(item.getItemId()==R.id.action_posts) {
             FragmentTransaction ft=childFm.beginTransaction();
-            ft.add(R.id.frameLayout_homepage, HomeFragment.newInstance(homePageClient));
+            userSelectedFragment = postsFragment;
+            ft.replace(R.id.frameLayout_homepage, userSelectedFragment);
             ft.commit();
         }
         else if(item.getItemId()==R.id.action_upcoming_events) {
             FragmentTransaction ft=childFm.beginTransaction();
-            ft.add(R.id.frameLayout_homepage, new AlumniFragment());
+            userSelectedFragment = new UpcomingEventsFragment();
+            ft.replace(R.id.frameLayout_homepage,userSelectedFragment );
+            ft.commit();
+        }
+        else if(item.getItemId() == R.id.action_heirarchy) {
+            HierarchyFragment hierarchyFragment = new HierarchyFragment();
+            FragmentTransaction ft=childFm.beginTransaction();
+            userSelectedFragment = hierarchyFragment;
+            ft.replace(R.id.frameLayout_homepage,userSelectedFragment);
+            ft.commit();
+        }
+        else if(item.getItemId() == R.id.action_contact) {
+            FragmentTransaction ft=childFm.beginTransaction();
+            userSelectedFragment=new ContactUsFragment();
+            ft.replace(R.id.frameLayout_homepage, userSelectedFragment);
             ft.addToBackStack("homepage");
             ft.commit();
         }

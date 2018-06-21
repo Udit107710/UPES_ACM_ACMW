@@ -10,7 +10,7 @@ import java.util.Random;
 
 
 public class OTPSender extends AsyncTask<String, Void, String> {
-
+    private String subject = "ACM Mail";
     private String mailBody;
     private String recipientMail;
     private final static String ACM_EMAIL = "appdev.upesacmacmw@gmail.com";               //ACM's gmail address
@@ -21,11 +21,11 @@ public class OTPSender extends AsyncTask<String, Void, String> {
     protected String doInBackground(String... params) {
         mailBody=params[0];
         recipientMail=params[1];
-
+        subject = params[2];
         try {
 
             GMailSender sender = new GMailSender(ACM_EMAIL, ACM_PASSWORD);          //Constructor call to LogIn
-            sender.sendMail("This is a testing mail",mailBody,ACM_EMAIL,   //Include Subject, body, Sender's gmail and recipient's email
+            sender.sendMail(subject,mailBody,ACM_EMAIL,   //Include Subject, body, Sender's gmail and recipient's email
                     recipientMail);
 
         } catch (Exception e) {

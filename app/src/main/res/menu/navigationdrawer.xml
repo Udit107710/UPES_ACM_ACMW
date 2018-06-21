@@ -2,11 +2,9 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
         <group android:checkableBehavior= "single">
 
-                <item android:id="@+id/action_events"
-                    android:title="@string/title_myevents" />
-
-                <item android:id="@+id/action_upcoming"
-                    android:title="@string/title_upcmngevents" />
+                <item
+                    android:id="@+id/action_home"
+                    android:title="@string/title_home" />
 
                 <item android:id="@+id/action_projects"
                     android:title="@string/title_projects" />
@@ -17,8 +15,9 @@
                 <item android:id="@+id/action_alumni"
                     android:title="@string/title_alumni"/>
 
-                <item android:id="@+id/actio_about"
-                    android:title="@string/title_About"/>
+                <item
+                    android:id="@+id/action_about"
+                    android:title="@string/title_About" />
 
         </group>
 </menu>

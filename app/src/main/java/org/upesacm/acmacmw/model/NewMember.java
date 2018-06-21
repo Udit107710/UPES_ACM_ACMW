@@ -33,6 +33,13 @@ public class NewMember implements Parcelable{
     private String sapId;
     private String phoneNo;
     private String whatsappNo;
+    private String recipientSap;
+    private String otp;
+    private boolean premium;
+
+
+
+
 
     protected NewMember(Parcel in) {
         fullName = in.readString();
@@ -43,16 +50,24 @@ public class NewMember implements Parcelable{
         phoneNo = in.readString();
         whatsappNo = in.readString();
         otp = in.readString();
-        premium = in.readByte() != 0;
+
+        boolean array[]=new boolean[1];
+        in.readBooleanArray(array);
+        premium = array[0];
+
+        recipientSap=in.readString();
     }
 
 
 
-    private String otp;
-    private boolean premium;
+
 
     public NewMember() {
 
+    }
+
+    public String getRecipientSap() {
+        return recipientSap;
     }
 
     public String getFullName() {
@@ -107,6 +122,7 @@ public class NewMember implements Parcelable{
         parcel.writeString(whatsappNo);
         parcel.writeString(otp);
         parcel.writeBooleanArray(new boolean[]{premium});
+        parcel.writeString(recipientSap);
 
     }
 
@@ -120,6 +136,7 @@ public class NewMember implements Parcelable{
         String phoneNo;
         String whatsappNo;
         String otp;
+        String recipientSap;
         boolean premium;
 
         public NewMember build() {
@@ -133,6 +150,7 @@ public class NewMember implements Parcelable{
             newMember.whatsappNo=this.whatsappNo;
             newMember.premium=this.premium;
             newMember.otp=this.otp;
+            newMember.recipientSap = this.recipientSap;
             return newMember;
         }
 
@@ -181,6 +199,9 @@ public class NewMember implements Parcelable{
             return this;
         }
 
+        public Builder setRecipientSap(String recipientSap) {
+            this.recipientSap = recipientSap;
+            return  this;
+        }
     }
-
 }

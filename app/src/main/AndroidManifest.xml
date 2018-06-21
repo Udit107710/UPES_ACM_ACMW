@@ -8,6 +8,9 @@
     <uses-feature
         android:name="android.hardware.camera.autofocus"
         android:required="false"/>
+    <uses-feature
+        android:name="android.hardware.telephony"
+        android:required="false" />
 
     <uses-permission android:name="android.permission.CALL_PHONE" />
     <uses-permission android:name="android.permission.CAMERA"/>
@@ -22,28 +25,21 @@
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
         <activity android:name=".activity.SplashActivity">
-        </activity>
-        <activity android:name=".EventRegistration"/>
-        <activity android:name=".MembersAtCampus"/>
-        <activity android:name=".activity.HomeActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <activity android:name=".ACMHeirarchyActivity"/>
-        <activity android:name=".Alumni">
-        <intent-filter>
-            <action android:name="android.intent.action.MAIN"/>
+        <activity android:name=".MembersAtCampus"/>
+        <activity android:name=".activity.HomeActivity"
+            android:screenOrientation="portrait">
 
-            <category android:name="android.intent.category.LAUNCHER"/>
-        </intent-filter>
-    </activity>
+        </activity>
 
         <provider
             android:name="android.support.v4.content.FileProvider"
-            android:authorities="com.example.android.fileprovider"
+            android:authorities="com.ashi.android.fileprovider"
             android:exported="false"
             android:grantUriPermissions="true">
             <meta-data
