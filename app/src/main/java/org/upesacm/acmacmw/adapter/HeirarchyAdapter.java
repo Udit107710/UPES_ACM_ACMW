@@ -1,5 +1,6 @@
 package org.upesacm.acmacmw.adapter;
 
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
@@ -7,6 +8,7 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.support.annotation.NonNull;
 import android.support.v7.widget.RecyclerView;
+import android.telephony.PhoneNumberUtils;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -49,10 +51,14 @@ public class HeirarchyAdapter extends RecyclerView.Adapter<HeirarchyAdapter.Heir
            holder.whatsapp.setOnClickListener(new View.OnClickListener() {
                @Override
                public void onClick(View view) {
-                   Uri uri = Uri.parse("smsto:"+heirarchyModels.get(position).getWhatsapp());
-                   Intent i = new Intent(Intent.ACTION_SENDTO, uri);
-                   i.setPackage("com.whatsapp");
-                   context.startActivity(i);
+//                   Uri uri = Uri.parse("smsto:"+heirarchyModels.get(position).getWhatsapp());
+//                   Intent i = new Intent(Intent.ACTION_SENDTO, uri);
+//                   i.setPackage("com.whatsapp");
+//                   context.startActivity(i);
+                   Intent sendIntent = new Intent("android.intent.action.MAIN");
+                   sendIntent.setComponent(new ComponentName("com.whatsapp", "com.whatsapp.Conversation"));
+                   sendIntent.putExtra("jid", PhoneNumberUtils.stripSeparators("91"+heirarchyModels.get(position).getWhatsapp()) + "@s.whatsapp.net");//phone number without "+" prefix
+                   context.startActivity(sendIntent);
                }
            });
            holder.linkedin.setOnClickListener(new View.OnClickListener() {
