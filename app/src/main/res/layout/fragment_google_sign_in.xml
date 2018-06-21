@@ -87,7 +87,7 @@
         android:layout_marginEnd="8dp"
         android:layout_marginStart="8dp"
         android:layout_marginTop="8dp"
-        android:text="After Sign up as guest user ,you won't be regarded as an ACM member.You can only post pictures then."
+        android:text="Trial Account will expire in 30days. After which you will be able to access limited feature of App"
         android:textColor="#000"
         android:textStyle="bold"
         app:layout_constraintBottom_toBottomOf="parent"

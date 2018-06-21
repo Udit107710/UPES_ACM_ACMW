@@ -198,7 +198,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:shadowColor="@color/onSeconadry"
-                    android:text="Premium (\u20B9 1500 - 4 Years + 1 Year International)" />
+                    android:text="Premium (\u20B9 1600 - 4 Years + 1 Year International)" />
 
                 <RadioButton
                     android:id="@+id/radio_button_normal"
@@ -206,7 +206,7 @@
                     android:layout_height="wrap_content"
                     android:layout_weight="1"
                     android:shadowColor="@color/onSeconadry"
-                    android:text="Normal (\u20B9 400 for 1 year)" />
+                    android:text="Normal (\u20B9 500 for 1 year)" />
             </RadioGroup>
 
             <Button
@@ -214,11 +214,10 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
 
-                android:layout_marginBottom="10dp"
+                android:layout_marginBottom="30dp"
                 android:layout_weight="1"
                 android:background="@color/colorPrimary"
                 android:text="Register" />
-
 
         </LinearLayout>
 

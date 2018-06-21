@@ -33,6 +33,8 @@ public class UserProfileFragment extends Fragment implements
     FloatingActionButton fabLogout;
 
     Member member;
+    private TextView memberId;
+
     public UserProfileFragment() {
         // Required empty public constructor
     }
@@ -70,14 +72,13 @@ public class UserProfileFragment extends Fragment implements
         textViewContact = view.findViewById(R.id.text_view_profile_contact);
         fabEdit = view.findViewById(R.id.fab_profile_edit);
         fabLogout = view.findViewById(R.id.fab_profile_logout);
-
+        memberId=view.findViewById(R.id.memberId);
         textViewName.setText(member.getName());
         textViewYear.setText(member.getYear());
         textViewBranch.setText(member.getBranch());
         textViewSap.setText(member.getSap());
         textViewContact.setText(member.getContact());
-
-
+        memberId.setText(member.getMemberId());
         fabEdit.setOnClickListener(this);
         fabLogout.setOnClickListener(this);
         return view;
