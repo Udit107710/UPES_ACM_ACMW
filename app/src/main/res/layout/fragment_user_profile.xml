@@ -111,6 +111,7 @@
                             android:layout_weight="1"
                             android:background="@android:color/darker_gray"
                             android:text="TextView"
+                            android:textAllCaps="true"
                             android:textAlignment="center"
                             android:textSize="18sp" />
                     </LinearLayout>
